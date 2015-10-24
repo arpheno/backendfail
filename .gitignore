@@ -13,11 +13,14 @@ develop-eggs/
 dist/
 downloads/
 eggs/
-.eggs/
+/.vagrant
 lib/
 lib64/
 parts/
 sdist/
+/backendfiddle/media
+/backendfiddle/db.sqlite3
+/backendfiddle/settings/secret.py
 var/
 *.egg-info/
 .installed.cfg

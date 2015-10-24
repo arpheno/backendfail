@@ -108,7 +108,10 @@ VIEWS_CONTENT='''from django.shortcuts import render
 
 # Create your views here.
 '''
-UWSGI_CONTENT='''os.environ.setdefault("DJANGO_SETTINGS_MODULE", "settings")
+WSGI_CONTENT='''import os
+
+from django.core.wsgi import get_wsgi_application
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "settings")
 
 application = get_wsgi_application()
 '''

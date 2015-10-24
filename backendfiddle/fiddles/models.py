@@ -7,8 +7,9 @@ from model_utils.managers import InheritanceManager
 from django.db import models
 
 # Create your models here.
-from settings.django import MANAGE_CONTENT, SETTINGS_CONTENT, VIEWS_CONTENT, MODELS_CONTENT
+from settings.django import MANAGE_CONTENT, SETTINGS_CONTENT, VIEWS_CONTENT, MODELS_CONTENT, WSGI_CONTENT
 from settings.django import URLS_CONTENT
+
 
 
 def get_upload_path(instance, filename):
@@ -38,7 +39,7 @@ class DjangoFiddle(Fiddle):
 
             self.create_file("manage.py",MANAGE_CONTENT)
             self.create_file("urls.py",URLS_CONTENT)
-            self.create_file("wsgi.py",URLS_CONTENT)
+            self.create_file("wsgi.py",WSGI_CONTENT)
             self.create_file("settings.py",SETTINGS_CONTENT)
             self.create_file("__init__.py","")
             self.create_file("app/models.py",MODELS_CONTENT)
