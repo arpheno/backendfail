@@ -38,6 +38,7 @@ class DjangoFiddle(Fiddle):
 
             self.create_file("manage.py",MANAGE_CONTENT)
             self.create_file("urls.py",URLS_CONTENT)
+            self.create_file("wsgi.py",URLS_CONTENT)
             self.create_file("settings.py",SETTINGS_CONTENT)
             self.create_file("__init__.py","")
             self.create_file("app/models.py",MODELS_CONTENT)

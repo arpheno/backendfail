@@ -10,7 +10,7 @@ class FiddleFileFactory(factory.Factory):
 class FiddleFactory(factory.Factory):
     class Meta:
         model = Fiddle
-    name = factory.sequence(lambda x: "default name "+ str(x))
+    name = factory.sequence(lambda x: "default_name_"+ str(x))
     @factory.post_generation
     def files(self,create,extracted,**kwargs):
         if not create:
@@ -22,4 +22,4 @@ class FiddleFactory(factory.Factory):
 class DjangoFiddleFactory(factory.Factory):
     class Meta:
         model = DjangoFiddle
-    name = factory.sequence(lambda x: "djangoname "+ str(x))
+    name = factory.sequence(lambda x: "djangoname"+ str(x))

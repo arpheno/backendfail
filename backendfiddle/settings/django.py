@@ -3,7 +3,7 @@ import os
 import sys
 
 if __name__ == "__main__":
-    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "settings.development")
+    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "settings")
 
     from django.core.management import execute_from_command_line
 
@@ -35,7 +35,7 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'fiddles'
+    'app'
 )
 
 MIDDLEWARE_CLASSES = (
@@ -67,7 +67,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'backendfiddle.wsgi.application'
+WSGI_APPLICATION = 'wsgi.application'
 
 
 # Database
@@ -93,18 +93,22 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 """
-URLS_CONTENT=''' from django.conf.urls import include, url
+URLS_CONTENT='''from django.conf.urls import include, url
 from django.contrib import admin
 
 urlpatterns = [
     url(r'^admin/', include(admin.site.urls)),
 ]
 '''
-MODELS_CONTENT=''' from django.db import models
+MODELS_CONTENT='''from django.db import models
 
 # Create your models here.
 '''
-VIEWS_CONTENT=''' from django.shortcuts import render
+VIEWS_CONTENT='''from django.shortcuts import render
 
 # Create your views here.
+'''
+UWSGI_CONTENT='''os.environ.setdefault("DJANGO_SETTINGS_MODULE", "settings")
+
+application = get_wsgi_application()
 '''
