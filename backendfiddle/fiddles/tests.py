@@ -39,10 +39,10 @@ def test_django_launch():
     obj._hash()
     obj._write_files()
     obj._launch()
-    sleep(3)
+    sleep(8)
     try:
-        assert "<" in local('curl localhost:8000',capture=True)
-        obj._cleanup()
+        assert local('curl localhost:'+str(obj.port),capture=True).return_code == 0
+        obj.cleanup()
     except:
-        obj._cleanup()
+        obj.cleanup()
         raise

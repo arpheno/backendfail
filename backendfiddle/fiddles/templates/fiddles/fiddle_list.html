@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% block header %}
+{% endblock %}
+{% block nav %}
+{% endblock %}
+{% block content %}
+    <style type="text/css">
+    main{
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+    }
+    h1 {text-align: center;}
+    </style>
+    <h1>Welcome to backendfiddle!</h1>
+    <p>This is a place where you can try out backend code for web applications using platforms such as django
+    or Ruby on Rails.</p>
+    <a href="{% url 'create-fiddle' %}"><button>Create new Fiddle</button></a>
+    <ul>
+        {% for object in object_list %}
+            <a href="{{ object.get_absolute_url }}">
+                <li>{{ object.name }}</li>
+            </a>
+        {% endfor %}
+    </ul>
+{% endblock %}

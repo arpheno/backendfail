@@ -16,6 +16,10 @@ Including another URLconf
 from django.conf.urls import include, url
 from django.contrib import admin
 
+from fiddles.views import FiddleList
+
 urlpatterns = [
+    url(r'^$', FiddleList.as_view(),name="fiddle-list"),
     url(r'^admin/', include(admin.site.urls)),
+    url(r'^fiddles/', include("fiddles.urls")),
 ]

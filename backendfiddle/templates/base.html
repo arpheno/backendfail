@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<style type="text/css">
+    body {
+        display: flex;
+        flex-wrap: wrap;
+    }
+
+    header {
+        flex: 1 1 100%;
+    }
+
+    nav {
+        flex: 0 1 20%;
+    }
+
+    main {
+        flex: 1 1 60%;
+    }
+
+    nav ul {
+        display: flex;
+        flex-wrap: wrap;
+    }
+
+    nav ul a {
+        flex: 1 1 100%;
+    }
+</style>
+<body>
+<header>
+    {% block header %}
+    {% endblock %}
+</header>
+<nav>
+    {% block nav %}
+    {% endblock %}
+</nav>
+<main>
+    {% block content %}
+    {% endblock %}
+</main>
+</body>
+</html>

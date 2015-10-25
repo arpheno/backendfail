@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% block header %}
+    <a href="{% url 'start' pk=object.fiddle.id %}">Start</a>
+    <a href="{% url 'stop' pk=object.fiddle.id %}">Stop</a>
+    <a href="{% url 'restart' pk=object.fiddle.id %}">Reload</a>
+    <a href="{% url 'result' url="" pk=object.fiddle.id %}">Result</a>
+{% endblock %}
+{% block nav %}
+    <ul>
+        {% for file in object.fiddle.fiddlefile_set.all %}
+            <a href="{{ file.get_absolute_url }}">
+                <li>{{ file.path }}</li>
+            </a>
+        {% endfor %}
+    </ul>
+{% endblock %}
+{% block content %}
+    <form action="" method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button>Submit</button>
+    </form>
+{% endblock %}
