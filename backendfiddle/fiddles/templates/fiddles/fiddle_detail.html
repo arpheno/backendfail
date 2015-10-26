@@ -1,15 +1,29 @@
 {% extends 'base.html' %}
 {% block header %}
-<a href="{% url 'start' pk=object.id %}">Start</a>
-<a href="{% url 'stop' pk=object.id %}">Stop</a>
-<a href="{% url 'restart' pk=object.id %}">Reload</a>
-<a href="{% url 'result' url="" pk=object.id %}">Result</a>
+
+    <a href="{% url 'start' pk=object.id %}">
+        <paper-button style="color:white">Start</paper-button>
+    </a>
+    <a href="{% url 'stop' pk=object.id %}">
+        <paper-button style="color:white">Stop</paper-button>
+    </a>
+    <a href="{% url 'restart' pk=object.id %}">
+        <paper-button style="color:white">Reload</paper-button>
+    </a>
+    <a href="{% url 'result' url="" pk=object.id %}">
+        <paper-button style="color:white">Result</paper-button>
+    </a>
 {% endblock %}
 {% block nav %}
     <ul>
         {% for file in object.fiddlefile_set.all %}
             <a href="{{ file.get_absolute_url }}">
-                <li>{{ file.path }}</li>
+                <paper-item>
+                    <paper-item-body two-line>
+                        <div>{{ file.path }}</div>
+                        <div secondary></div>
+                    </paper-item-body>
+                </paper-item>
             </a>
         {% endfor %}
     </ul>

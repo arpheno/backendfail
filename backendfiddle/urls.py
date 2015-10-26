@@ -17,9 +17,10 @@ from django.conf.urls import include, url
 from django.contrib import admin
 
 from fiddles.views import FiddleList, CreateFiddle
-
+import debug_toolbar
 urlpatterns = [
     url(r'^$', FiddleList.as_view(),name="fiddle-list"),
     url(r'^admin/', include(admin.site.urls)),
+    url(r'^__debug__/', include(debug_toolbar.urls)),
     url(r'^', include("fiddles.urls")),
 ]

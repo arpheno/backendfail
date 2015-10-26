@@ -22,6 +22,7 @@ sdist/
 /backendfiddle/db.sqlite3
 /backendfiddle/settings/secret.py
 var/
+/backendfiddle/components
 *.egg-info/
 .installed.cfg
 *.egg

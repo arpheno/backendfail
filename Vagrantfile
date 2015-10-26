@@ -21,6 +21,7 @@ Vagrant.configure(2) do |config|
   config.vm.provision "shell" do |s|
     s.inline = "groupadd -f docker"
   end
+
    config.vm.provision "docker" do |d|
     #d.run "selenium/standalone-chrome",
     #args:" -p 4444:4444 -v /dev/shm:/dev/shm -d"

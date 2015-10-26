@@ -1,5 +1,6 @@
 import os
 
+import time
 from django.core.exceptions import ValidationError
 from django.core.urlresolvers import reverse_lazy
 from django.db import models
@@ -36,6 +37,7 @@ class Fiddle(models.Model):
         self._hash()
         self._write_files()
         self._launch()
+        time.sleep(3)
 
     def cleanup(self):
         self._stop()
