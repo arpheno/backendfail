@@ -3,12 +3,10 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>Backendfiddle</title>
+    <link rel="stylesheet" href="{% static 'reset.css' %}">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.4/jquery.js"></script>
     <script src="{% static 'webcomponentsjs/webcomponents.js' %}"></script>
-    <style type="text/css">
-    *{font-family: 'Roboto', sans-serif;}
-    </style>
-    <link href='https://fonts.googleapis.com/css?family=Roboto' rel='stylesheet' type='text/css'>
     <link rel="import" href="{% static 'paper-styles/paper-styles.html' %}">
     <link rel="import" href="{% static 'paper-header-panel/paper-header-panel.html' %}">
     <link rel="import" href="{% static 'paper-toolbar/paper-toolbar.html' %}">
@@ -16,15 +14,20 @@
     <link rel="import" href="{% static 'paper-button/paper-button.html' %}">
     <link rel="import" href="{% static 'paper-item/paper-item.html' %}">
     <link rel="import" href="{% static 'paper-drawer-panel/paper-drawer-panel.html' %}">
+    <style type="text/css">
+    *{font-family: 'Roboto', sans-serif;}
+    paper-toolbar{background-color: #0b8043 !important;}
+    h1 {font-size: 23px;}
+    h1,p,a {text-align: center;padding:20px;}
+    </style>
+    <link href='https://fonts.googleapis.com/css?family=Roboto' rel='stylesheet' type='text/css'>
+    <link rel="import" href="{% static 'polymer/polymer.html' %}">
 </head>
-<style type="text/css">
-
-</style>
 <body>
 <paper-drawer-panel>
     <paper-header-panel drawer>
         <paper-toolbar>
-            <div>Backendfiddle</div>
+            <a href="/"><div style="color:white;text-underline: none">Backendfiddle</div></a>
         </paper-toolbar>
         <nav>
             {% block nav %}
@@ -37,11 +40,13 @@
             {% block header %}
             {% endblock %}
         </paper-toolbar>
-        <main>
+        <main style="display:flex;justify-content: center;align-items: center;align-content: center;
+        position: absolute;left:0;right: 0;top:0;bottom:0;">
             {% block content %}
             {% endblock %}
         </main>
     </paper-header-panel>
 </paper-drawer-panel>
+
 </body>
 </html>

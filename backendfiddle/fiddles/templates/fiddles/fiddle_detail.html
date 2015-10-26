@@ -1,18 +1,11 @@
 {% extends 'base.html' %}
 {% block header %}
-
-    <a href="{% url 'start' pk=object.id %}">
-        <paper-button style="color:white">Start</paper-button>
-    </a>
-    <a href="{% url 'stop' pk=object.id %}">
-        <paper-button style="color:white">Stop</paper-button>
-    </a>
-    <a href="{% url 'restart' pk=object.id %}">
-        <paper-button style="color:white">Reload</paper-button>
-    </a>
     <a href="{% url 'result' url="" pk=object.id %}">
         <paper-button style="color:white">Result</paper-button>
     </a>
+    <paper-button style="color:white" onclick="iframe_refresh();">Refresh</paper-button>
+    <paper-button style="color:white" onclick="iframe_back();">Back</paper-button>
+    <paper-button style="color:white" onclick="iframe_forward();">Forward</paper-button>
 {% endblock %}
 {% block nav %}
     <ul>
@@ -29,5 +22,25 @@
     </ul>
 {% endblock %}
 {% block content %}
-    Click one of the files on the left to start editing!
+    <div> Click one of the files on the left to start editing!</div>
+    <div id="preview" style="height:100%;">
+        <h1> You will see the result here.</h1>
+
+        <p>Since a new container will be spawned, this might take a while.</p>
+    </div>
+    <script>
+        function iframe_back() {
+            $("#preview iframe").contentWindow.history.back();
+        }
+        function iframe_forward() {
+            $("#preview iframe").contentWindow.history.forward();
+        }
+        function iframe_refresh() {
+            $("#preview iframe").src = $("#preview iframe").src;
+        }
+
+        $(function () {
+            $("#preview").append($("<iframe>").attr('src', '/{{ object.id }}/result/'))
+        })
+    </script>
 {% endblock %}

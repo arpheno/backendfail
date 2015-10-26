@@ -1,6 +1,8 @@
 import os
 
 import time
+
+from django.conf.global_settings import AUTH_USER_MODEL
 from django.core.exceptions import ValidationError
 from django.core.urlresolvers import reverse_lazy
 from django.db import models
@@ -28,16 +30,17 @@ def create_file(path, content):
 
 
 class Fiddle(models.Model):
-    name = models.CharField(max_length=20, unique=True)
     hash = models.CharField(max_length=32, null=True, blank=True)
     port = models.IntegerField(null=True, blank=True)
+    owner = models.ForeignKey(AUTH_USER_MODEL)
     objects = InheritanceManager()
-
     def spawn(self):
         self._hash()
         self._write_files()
         self._launch()
-        time.sleep(3)
+    def _launch(self):
+         # This should be implemented by each child
+        raise NotImplementedError
 
     def cleanup(self):
         self._stop()
@@ -45,7 +48,7 @@ class Fiddle(models.Model):
 
     def _stop(self):
         with lcd(os.path.join('containers')):
-            local('docker stop ' + self.hash + ' && docker rm ' + self.hash)
+            local('docker stop -t 1 ' + self.hash )
 
     def _delete_files(self):
         with lcd(os.path.join('containers')):

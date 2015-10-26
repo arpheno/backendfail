@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+{% block nav %}
+    <ul>
+        {% for file in object.fiddle.fiddlefile_set.all %}
+            <a href="{{ file.get_absolute_url }}">
+                <paper-item>
+                    <paper-item-body two-line>
+                        <div>{{ file.path }}</div>
+                        <div secondary></div>
+                    </paper-item-body>
+                </paper-item>
+            </a>
+        {% endfor %}
+    </ul>
+{% endblock %}
+{% block content %}
+    <style type="text/css">
+        textarea, #editor {
+            position: absolute;
+            bottom: 0;
+            top: 5px;
+            border: none;
+            left: 0;
+            width:50%;
+        }
+        #preview{
+            position: absolute;
+            right:0;
+            width:50%;
+            top:0;
+            bottom:0;
+        }
+        #editor * {
+            font-family: monospace
+        }</style>
+
+    <div id="editor"></div>
+    <div id="preview">
+        <h1> You will see the result here.</h1>
+
+        <p>Since a new container will be spawned, this might take a while.</p>
+    </div>
+    <script src="http://d1n0x3qji82z53.cloudfront.net/src-min-noconflict/ace.js" type="text/javascript"
+            charset="utf-8"></script>
+    <script type="text/javascript">
+        function update_file() {
+            var editor = ace.edit("editor");
+            code = editor.getValue();
+            var csrf = $("{% csrf_token %}").attr("value");
+            console.log(csrf);
+            $.post("", {
+                content: code, csrfmiddlewaretoken: csrf
+            });
+        }
+        var editor = ace.edit("editor");
+        var con = "{{ file_content|escapejs }}";
+        console.log(con);
+        editor.setValue(con, -1);
+        editor.setTheme("ace/theme/chrome");
+        if (window.location.pathname.indexOf(".js") > -1)
+            editor.getSession().setMode("ace/mode/javascript");
+        if (window.location.pathname.indexOf(".py") > -1)
+            editor.getSession().setMode("ace/mode/python");
+        if (window.location.pathname.indexOf(".html") > -1)
+            editor.getSession().setMode("ace/mode/html");
+        function iframe_back() {
+            $("#preview iframe").contentWindow.history.back();
+        }
+        function iframe_forward() {
+            $("#preview iframe").contentWindow.history.forward();
+        }
+        function iframe_refresh() {
+            $("#preview iframe").src = $("#preview iframe").src;
+        }
+
+        $(function () {
+            $("#preview").append($("<iframe>").attr('src', '/{{ object.fiddle.id }}/result/'))
+        })
+    </script>
+{% endblock %}

@@ -2,12 +2,14 @@
 from __future__ import unicode_literals
 
 from django.db import migrations, models
+from django.conf import settings
 import fiddles.models
 
 
 class Migration(migrations.Migration):
 
     dependencies = [
+        migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
@@ -15,9 +17,9 @@ class Migration(migrations.Migration):
             name='Fiddle',
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
-                ('name', models.CharField(unique=True, max_length=20)),
                 ('hash', models.CharField(max_length=32, null=True, blank=True)),
                 ('port', models.IntegerField(null=True, blank=True)),
+                ('owner', models.ForeignKey(to=settings.AUTH_USER_MODEL)),
             ],
         ),
         migrations.CreateModel(
