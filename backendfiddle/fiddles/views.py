@@ -1,4 +1,5 @@
-from django.shortcuts import render
+from django.core.urlresolvers import reverse_lazy
+from django.shortcuts import render, redirect
 # Create your views here.
 from django.views.generic import View, DetailView, UpdateView, ListView, CreateView
 from httpproxy.views import HttpProxy
@@ -31,6 +32,7 @@ class EditFile(FiddleMixin,UpdateView):
         return Fiddle.objects.get(pk=self.kwargs['pk']).fiddlefile_set.get(path=self.kwargs['path'])
 class FiddleView(FiddleMixin,DetailView):
     model = Fiddle
+    template_name = 'fiddles/fiddle_detail.html'
 class FiddleList(FiddleMixin,ListView):
     model = Fiddle
 class CreateFiddle(FiddleMixin,CreateView):
@@ -41,19 +43,21 @@ class CreateFiddle(FiddleMixin,CreateView):
             return getattr(models,self.kwargs["class"])
         except:
             return getattr(djmodels,self.kwargs["class"])
+    def get_success_url(self):
+        return reverse_lazy("fiddle-detail",kwargs={"pk":self.object.id})
 class RestartView(FiddleMixin,DetailView):
     model = Fiddle
     def get(self, request, *args, **kwargs):
         self.get_object().cleanup()
         self.get_object().spawn()
-        return super(RestartView, self).get(request, *args, **kwargs)
+        return redirect(reverse_lazy('result',kwargs={"pk":self.get_object().id,"url":""}))
 class StopView(FiddleMixin,DetailView):
     model = Fiddle
     def get(self, request, *args, **kwargs):
         self.get_object().cleanup()
-        return super(StopView, self).get(request, *args, **kwargs)
+        return redirect(reverse_lazy("fiddle-detail",kwargs={"pk":self.get_object.id}))
 class LaunchView(FiddleMixin,DetailView):
     model = Fiddle
     def get(self, request, *args, **kwargs):
         self.get_object().spawn()
-        return super(LaunchView, self).get(request, *args, **kwargs)
+        return redirect(reverse_lazy('result',kwargs={"pk":self.get_object().id,"url":""}))
