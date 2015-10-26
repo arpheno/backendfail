@@ -20,16 +20,25 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/1.8/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = ')=ldq-brpp(+%xh6u43*7smd7#dkm%sv3_z02yf%$q(*@atn+i'
+try:
+    from secret import SECRET_KEY,SOCIAL_AUTH_GITHUB_KEY,SOCIAL_AUTH_GITHUB_SECRET
+except ImportError:
+    SECRET_KEY = 'you would like this right?'
+    SOCIAL_AUTH_GITHUB_KEY = 'asdasdaasdsdasdasd'
+    SOCIAL_AUTH_GITHUB_SECRET = 'asdasdasdasdcab'
+
 MEDIA_ROOT = os.path.join(BASE_DIR,"media")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
 ALLOWED_HOSTS = []
 
-
+AUTHENTICATION_BACKENDS = (
+    'social.backends.github.GithubOAuth2',
+    'social.backends.google.GoogleOAuth2',
+    'django.contrib.auth.backends.ModelBackend',
+)
 # Application definition
-
 INSTALLED_APPS = (
     'django.contrib.admin',
     'django.contrib.auth',
@@ -39,6 +48,7 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'fiddles',
     'debug_toolbar',
+    'social.apps.django_app.default',
     'dj',
     'httpproxy'
 )
@@ -52,6 +62,7 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django.middleware.security.SecurityMiddleware',
+    'social.apps.django_app.middleware.SocialAuthExceptionMiddleware',
 )
 
 ROOT_URLCONF = 'urls'
@@ -67,11 +78,12 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'social.apps.django_app.context_processors.backends',
+                'social.apps.django_app.context_processors.login_redirect',
             ],
         },
     },
 ]
-
 WSGI_APPLICATION = 'wsgi.application'
 
 

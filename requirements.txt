@@ -21,3 +21,4 @@ wsgiref==0.1.2
 fabric
 django-http-proxy
 django-debug-toolbar
+python-social-auth

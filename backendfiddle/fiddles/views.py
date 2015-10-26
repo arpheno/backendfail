@@ -93,7 +93,7 @@ class FiddleList(FiddleMixin, ListView):
 class CreateFiddle(View):
     def get(self, request, *args, **kwargs):
         # TODO Maybe auth?
-        self.object = self.get_model().objects.create()
+        self.object = self.get_model().objects.create(owner=self.request.user)
         return redirect(self.get_success_url())
 
     def get_model(self):

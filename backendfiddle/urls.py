@@ -22,5 +22,6 @@ urlpatterns = [
     url(r'^$', FiddleList.as_view(),name="fiddle-list"),
     url(r'^admin/', include(admin.site.urls)),
     url(r'^__debug__/', include(debug_toolbar.urls)),
+    url('', include('social.apps.django_app.urls', namespace='social')),
     url(r'^', include("fiddles.urls")),
 ]
