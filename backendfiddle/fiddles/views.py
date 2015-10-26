@@ -1,4 +1,6 @@
 import time
+
+from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse_lazy
 from django.shortcuts import render, redirect
 # Create your views here.
@@ -15,7 +17,11 @@ class FiddleMixin(object):
     def get_queryset(self):
         return super(FiddleMixin, self).get_queryset().select_subclasses()
 
-
+class LoginRequiredMixin(object):
+    @classmethod
+    def as_view(cls, **initkwargs):
+        view = super(LoginRequiredMixin, cls).as_view(**initkwargs)
+        return login_required(view)
 class DynProxyView(FiddleMixin, HttpProxy):
     """ This is where the magic happens """
 
@@ -54,7 +60,7 @@ class DynProxyView(FiddleMixin, HttpProxy):
         return result[:-1]
 
 
-class EditFile(FiddleMixin, UpdateView):
+class EditFile(LoginRequiredMixin,FiddleMixin, UpdateView):
     model = FiddleFile
     fields = ["content"]
     template_name = "fiddles/fiddlefile_edit.html"
@@ -90,7 +96,7 @@ class FiddleList(FiddleMixin, ListView):
     model = Fiddle
 
 
-class CreateFiddle(View):
+class CreateFiddle(LoginRequiredMixin,View):
     def get(self, request, *args, **kwargs):
         # TODO Maybe auth?
         self.object = self.get_model().objects.create(owner=self.request.user)
@@ -107,7 +113,7 @@ class CreateFiddle(View):
         return reverse_lazy("fiddle-detail", kwargs={"pk": self.object.id})
 
 
-class CopyFiddle(FiddleMixin, DetailView):
+class CopyFiddle(LoginRequiredMixin,FiddleMixin, DetailView):
     """ Copy a fiddle to allow someone to edit """
     def get(self, *args, **kwargs):
         self.copy_fiddle()

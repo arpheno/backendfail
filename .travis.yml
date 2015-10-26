@@ -1,0 +1,15 @@
+language: python
+
+python:
+- 2.7
+
+install:
+- pip install -r requirements.txt
+- pip install fabric pytest-django pytest-xdist ijson coveralls coverage
+- cd backendfiddle
+- python manage.py migrate
+
+script:
+- fab coverage
+after_success:
+  coveralls
