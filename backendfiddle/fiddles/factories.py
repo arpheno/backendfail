@@ -1,5 +1,5 @@
 import factory
-from fiddles.models import Fiddle, FiddleFile, DjangoFiddle
+from fiddles.models import Fiddle, FiddleFile
 
 
 class FiddleFileFactory(factory.Factory):
@@ -19,7 +19,4 @@ class FiddleFactory(factory.Factory):
         self.save()
         obj = FiddleFileFactory(fiddle=self)
         obj.save()
-class DjangoFiddleFactory(factory.Factory):
-    class Meta:
-        model = DjangoFiddle
-    name = factory.sequence(lambda x: "djangoname"+ str(x))
+

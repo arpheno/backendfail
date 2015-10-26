@@ -16,7 +16,7 @@
     <h1>Welcome to backendfiddle!</h1>
     <p>This is a place where you can try out backend code for web applications using platforms such as django
     or Ruby on Rails.</p>
-    <a href="{% url 'create-fiddle' %}"><button>Create new Fiddle</button></a>
+    <a href="{% url 'create-fiddle' class="DjangoFiddle" %}"><button>Create new Fiddle</button></a>
     <ul>
         {% for object in object_list %}
             <a href="{{ object.get_absolute_url }}">

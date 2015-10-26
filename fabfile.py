@@ -3,7 +3,7 @@ from fabric.operations import local
 
 def test():
     with lcd('backendfiddle'):
-        local('py.test fiddles/test.py')
+        local('py.test django/test.py')
 def ddocker(project='djangoname0'):
     with lcd("backendfiddle/media/djangoname0"):
         cmd = ["docker run"]

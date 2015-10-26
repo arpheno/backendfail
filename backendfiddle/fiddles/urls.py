@@ -3,7 +3,7 @@ from django.conf.urls import include, url
 from fiddles.views import DynProxyView, LaunchView, FiddleView, EditFile, RestartView, StopView, CreateFiddle
 
 urlpatterns = [
-    url(r'^new/?$', CreateFiddle.as_view(),name="create-fiddle"),
+    url(r'^new/(?P<class>[-\w]+)/?$', CreateFiddle.as_view(),name="create-fiddle"),
     url(r'^(?P<pk>[-\w]+)/launch/?$', LaunchView.as_view(),name='start'),
     url(r'^(?P<pk>[-\w]+)/stop/?$', StopView.as_view(),name='stop'),
     url(r'^(?P<pk>[-\w]+)/result/(?P<url>.*)$', DynProxyView.as_view(),name='result'),

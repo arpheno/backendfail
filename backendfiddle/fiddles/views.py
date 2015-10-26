@@ -4,7 +4,8 @@ from django.views.generic import View, DetailView, UpdateView, ListView, CreateV
 from httpproxy.views import HttpProxy
 
 from fiddles.models import Fiddle, FiddleFile
-
+from fiddles import models
+from dj import models as djmodels
 
 class DynProxyView(HttpProxy):
     def get_object(self):
@@ -19,31 +20,39 @@ class DynProxyView(HttpProxy):
         result = super(DynProxyView, self).get_full_url(url)
         print result
         return result[:-1]
+class FiddleMixin(object):
+    def get_queryset(self):
+        return super(FiddleMixin, self).get_queryset().select_subclasses()
 
-
-class EditFile(UpdateView):
+class EditFile(FiddleMixin,UpdateView):
     model = FiddleFile
     fields = ["content"]
     def get_object(self, queryset=None):
         return Fiddle.objects.get(pk=self.kwargs['pk']).fiddlefile_set.get(path=self.kwargs['path'])
-class FiddleView(DetailView):
+class FiddleView(FiddleMixin,DetailView):
     model = Fiddle
-class FiddleList(ListView):
+class FiddleList(FiddleMixin,ListView):
     model = Fiddle
-class CreateFiddle(CreateView):
-    model = Fiddle
-class RestartView(DetailView):
+class CreateFiddle(FiddleMixin,CreateView):
+    fields = ["name"]
+    @property
+    def model(self):
+        try:
+            return getattr(models,self.kwargs["class"])
+        except:
+            return getattr(djmodels,self.kwargs["class"])
+class RestartView(FiddleMixin,DetailView):
     model = Fiddle
     def get(self, request, *args, **kwargs):
         self.get_object().cleanup()
         self.get_object().spawn()
         return super(RestartView, self).get(request, *args, **kwargs)
-class StopView(DetailView):
+class StopView(FiddleMixin,DetailView):
     model = Fiddle
     def get(self, request, *args, **kwargs):
         self.get_object().cleanup()
         return super(StopView, self).get(request, *args, **kwargs)
-class LaunchView(DetailView):
+class LaunchView(FiddleMixin,DetailView):
     model = Fiddle
     def get(self, request, *args, **kwargs):
         self.get_object().spawn()
