@@ -77,7 +77,6 @@ class Fiddle(models.Model):
 
 class FiddleFile(models.Model):
     fiddle = models.ForeignKey('fiddles.Fiddle')
-    file = models.FileField(upload_to=get_upload_path)
     content = models.TextField()
     path = models.CharField(max_length=50)
 

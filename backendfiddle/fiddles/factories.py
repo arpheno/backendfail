@@ -1,16 +1,28 @@
 import factory
+from django.contrib.auth.models import User
+
 from fiddles.models import Fiddle, FiddleFile
 
+class UserFactory(factory.DjangoModelFactory):
+    class Meta:
+        model = User
+    email = 'admin@admin.com'
+    username = 'admin'
+    password = factory.PostGenerationMethodCall('set_password', 'adm1n')
 
+    is_superuser = True
+    is_staff = True
+    is_active = True
 class FiddleFileFactory(factory.Factory):
     class Meta:
         model = FiddleFile
-    file = factory.django.FileField(data = "fart")
+    content = "lol"
+    path="your mom"
 
 class FiddleFactory(factory.Factory):
     class Meta:
         model = Fiddle
-    name = factory.sequence(lambda x: "default_name_"+ str(x))
+    owner = factory.SubFactory(UserFactory)
     @factory.post_generation
     def files(self,create,extracted,**kwargs):
         if not create:

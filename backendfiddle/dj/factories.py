@@ -1,10 +1,10 @@
 import factory
 
 from dj.models import DjangoFiddle
+from fiddles.factories import UserFactory
 
 
 class DjangoFiddleFactory(factory.Factory):
     class Meta:
         model = DjangoFiddle
-
-    name = factory.sequence(lambda x: "djangoname" + str(x))
+    owner = factory.SubFactory(UserFactory)
