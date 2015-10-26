@@ -50,6 +50,7 @@ INSTALLED_APPS = (
     'debug_toolbar',
     'social.apps.django_app.default',
     'dj',
+    'ror',
     'httpproxy'
 )
 

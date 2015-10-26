@@ -12,7 +12,7 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name='DjangoFiddle',
+            name='RailsFiddle',
             fields=[
                 ('fiddle_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='fiddles.Fiddle')),
             ],

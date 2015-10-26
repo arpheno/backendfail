@@ -27,9 +27,10 @@ Vagrant.configure(2) do |config|
     #args:" -p 4444:4444 -v /dev/shm:/dev/shm -d"
     #d.run "hopsoft/graphite-statsd",
     #args:"--name graphite -p 8005:80 -p 2003:2003 -p 8125:8125/udp -d"
-    d.run "sameersbn/postgresql",
-    args:"--name postgresql -e 'DB_USER=myapp' -e 'DB_NAME=myapp' -e 'DB_PASS=dbpass' -d"
+    d.run "django",
+    args:"-d"
   end
+  config.vm.provision :shell, :path => "bootstrap.sh"
   config.vm.network "forwarded_port", guest: 80, host: 9080
   config.vm.network "forwarded_port", guest: 8000, host: 9000
   config.vm.network "forwarded_port", guest: 8005, host: 9005
