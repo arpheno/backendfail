@@ -7,6 +7,7 @@ from fabric.operations import local
 
 from dj.factories import DjangoFiddleFactory
 from dj.models import DjangoFiddle
+from fiddles.factories import UserFactory
 
 
 @pytest.mark.django_db
@@ -16,8 +17,9 @@ def test_django_creation():
     assert obj.fiddlefile_set.count()>0
 @pytest.mark.django_db
 def test_django_write_files():
-    obj = DjangoFiddleFactory.create()
+    obj = DjangoFiddleFactory()
     obj.save()
+    obj=DjangoFiddle.objects.get(id=obj.id)
     obj._hash()
     obj._write_files()
     root = os.path.join("containers",obj.hash)
@@ -29,9 +31,12 @@ def test_django_write_files():
 
 @pytest.mark.django_db
 def test_create_django():
-    c=Client()
-    response=c.post("/fiddles/new/DjangoFiddle/",{"name":"blabla"})
+    cli=Client()
+    usr=UserFactory()
+    cli.login(user=usr)
+    response=cli.get("/new/DjangoFiddle/")
     assert DjangoFiddle.objects.count()==1
+@pytest.mark.docker
 @pytest.mark.django_db
 def test_django_launch():
     assert DjangoFiddle.objects.count() == 0

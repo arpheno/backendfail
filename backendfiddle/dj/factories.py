@@ -1,10 +1,20 @@
 import factory
 
 from dj.models import DjangoFiddle
-from fiddles.factories import UserFactory
+from fiddles.factories import UserFactory, FiddleFileFactory
 
 
-class DjangoFiddleFactory(factory.Factory):
+class DjangoFiddleFactory(factory.DjangoModelFactory):
     class Meta:
         model = DjangoFiddle
     owner = factory.SubFactory(UserFactory)
+    @factory.post_generation
+    def files(self,create,extracted,**kwargs):
+        if not create:
+            # Simple build, do nothing.
+            return
+        self.save()
+        obj = FiddleFileFactory(path="app/templates/app",fiddle=self)
+        obj.save()
+        obj = FiddleFileFactory(path="app/__init__.py",fiddle=self)
+        obj.save()

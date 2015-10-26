@@ -29,6 +29,6 @@ class FiddleFactory(factory.Factory):
             # Simple build, do nothing.
             return
         self.save()
-        obj = FiddleFileFactory(fiddle=self)
+        obj = FiddleFileFactory(path="app/templates/app",fiddle=self)
         obj.save()
 

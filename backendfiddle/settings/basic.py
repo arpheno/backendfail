@@ -34,9 +34,9 @@ DEBUG = True
 ALLOWED_HOSTS = []
 
 AUTHENTICATION_BACKENDS = (
+    'django.contrib.auth.backends.ModelBackend',
     'social.backends.github.GithubOAuth2',
     'social.backends.google.GoogleOAuth2',
-    'django.contrib.auth.backends.ModelBackend',
 )
 # Application definition
 INSTALLED_APPS = (
