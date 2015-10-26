@@ -14,3 +14,8 @@ def ddocker(project='djangoname0'):
         cmd.append('-d django')
         cmd.append('bash -c "python manage.py runserver 0.0.0.0:8000"')
         local(' '.join(cmd))
+
+def test():
+    return local(r'py.test -n 4 backendfiddle/fiddles/tests.py backendfiddle/dj/tests.py')
+def coverage():
+    local(r'coverage run --omit="fabfile.py,settings/**" --source . -m py.test -n 4 backendfiddle/fiddles/tests.py backendfiddle/dj/tests.py')
