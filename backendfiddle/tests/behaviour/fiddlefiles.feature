@@ -25,6 +25,21 @@ Scenario: Editing files without login
     And I own the file
     When I try to edit the file
     Then It should be edited
+Scenario: Viewing editing files of others
+    Given I'm logged in as peter
+    And There is a file
+    And I don't own the file
+    When I try to access edit the file
+    Then The fiddle should be copied
+    And I should own the copy
+    And I should be redirected to the file
+
+  Scenario: Editing files of others
+    Given I'm logged in as peter
+    And There is a file
+    And I don't own the file
+    When I try to edit the file
+    Then Permission should be denied
 
 Scenario: Creating fiddles without login
     Given I'm logged in as no one

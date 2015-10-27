@@ -1,6 +1,6 @@
 import time
-
 from django.contrib.auth.decorators import login_required
+from django.core.exceptions import PermissionDenied
 from django.core.urlresolvers import reverse_lazy
 from django.shortcuts import render, redirect
 # Create your views here.
@@ -17,11 +17,14 @@ class FiddleMixin(object):
     def get_queryset(self):
         return super(FiddleMixin, self).get_queryset().select_subclasses()
 
+
 class LoginRequiredMixin(object):
     @classmethod
     def as_view(cls, **initkwargs):
         view = super(LoginRequiredMixin, cls).as_view(**initkwargs)
         return login_required(view)
+
+
 class DynProxyView(FiddleMixin, HttpProxy):
     """ This is where the magic happens """
 
@@ -60,17 +63,41 @@ class DynProxyView(FiddleMixin, HttpProxy):
         return result[:-1]
 
 
-class EditFile(LoginRequiredMixin,FiddleMixin, UpdateView):
+class EditFile(LoginRequiredMixin, FiddleMixin, UpdateView):
     model = FiddleFile
     fields = ["content"]
     template_name = "fiddles/fiddlefile_edit.html"
+
     def get_context_data(self, **kwargs):
         context = super(EditFile, self).get_context_data(**kwargs)
         context['file_content'] = self.get_object().content
         return context
+    def post(self, request, *args, **kwargs):
+        if not self.request.user == self.get_object().fiddle.owner:
+            raise PermissionDenied
+        return super(EditFile, self).post(request,*args,**kwargs)
+    def get(self, request, *args, **kwargs):
+        if not self.request.user == self.get_object().fiddle.owner:
+            # if it doesn't belong to the user we create a new fiddle.
+            result = self.copy_fiddle(self.get_object())
+            return redirect(reverse_lazy('file-edit',
+                                         kwargs={"pk": result.id, "path": self.kwargs['path']}))
+        return super(EditFile, self).get(request, *args, **kwargs)
 
     def get_object(self, queryset=None):
         return Fiddle.objects.get(pk=self.kwargs['pk']).fiddlefile_set.get(path=self.kwargs['path'])
+
+    def copy_fiddle(self, obj):
+        obj=obj.fiddle
+        obj.id = None
+        obj.owner = self.request.user
+        obj.save()
+        print obj.id
+        for file in self.get_object().fiddle.fiddlefile_set.all():
+            file.id = None
+            file.fiddle = obj
+            file.save()
+        return obj
 
 
 class ViewFile(FiddleMixin, DetailView):
@@ -95,7 +122,7 @@ class FiddleList(FiddleMixin, ListView):
     model = Fiddle
 
 
-class CreateFiddle(LoginRequiredMixin,View):
+class CreateFiddle(LoginRequiredMixin, View):
     def get(self, request, *args, **kwargs):
         # TODO Maybe auth?
         self.object = self.get_model().objects.create(owner=self.request.user)
@@ -107,27 +134,6 @@ class CreateFiddle(LoginRequiredMixin,View):
             return getattr(models, self.kwargs["class"])
         except:
             return getattr(djmodels, self.kwargs["class"])
-
-    def get_success_url(self):
-        return reverse_lazy("fiddle-detail", kwargs={"pk": self.object.id})
-
-
-class CopyFiddle(LoginRequiredMixin,FiddleMixin, DetailView):
-    """ Copy a fiddle to allow someone to edit """
-    def get(self, *args, **kwargs):
-        self.copy_fiddle()
-        return redirect(self.get_success_url())
-
-    def copy_fiddle(self):
-        obj = self.get_object()
-        obj.id = None
-        obj.owner = self.request.user
-        obj.save()
-        for file in self.get_object().fiddlefile_set.all():
-            file.id = None
-            file.fiddle = obj
-            file.save()
-        self.object = obj
 
     def get_success_url(self):
         return reverse_lazy("fiddle-detail", kwargs={"pk": self.object.id})

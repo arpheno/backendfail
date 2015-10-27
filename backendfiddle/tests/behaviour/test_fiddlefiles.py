@@ -28,6 +28,12 @@ def test_edit_create_anon():
 @scenario('fiddlefiles.feature', 'Creating fiddles with login')
 def test_edit_create():
     pass
+@scenario('fiddlefiles.feature', 'Viewing editing files of others')
+def test_edit_copy_view():
+    pass
+@scenario('fiddlefiles.feature', 'Editing files of others')
+def test_edit_copy():
+    pass
 
 @given(re(r"I'm logged in as (?P<user>.*)"))
 @pytest.mark.django_db
@@ -47,6 +53,9 @@ def fiddlefile(db):
 def obtain(fiddlefile,user):
     fiddlefile.fiddle.owner=User.objects.get(username=user)
     fiddlefile.fiddle.save()
+@given("I don't own the file")
+def dontown(fiddlefile,user):
+    pass
 @given("There is no fiddle")
 def purge_fiddle(db):
     Fiddle.objects.all().delete()
@@ -63,14 +72,12 @@ def get_file(fiddlefile, myclient):
     )
 @when('I try to access edit the file')
 def get_edit_view(fiddlefile, myclient):
-    myclient.response= myclient.get(
-        reverse_lazy('file-edit',
-                     kwargs={
-                         "pk":fiddlefile.fiddle.id,
-                         "path":fiddlefile.path
-                     }
-                     )
-    )
+    info={
+        "pk":fiddlefile.fiddle.id,
+        "path":fiddlefile.path
+    }
+    url = reverse_lazy('file-edit',kwargs=info)
+    myclient.response= myclient.get(url)
 @when('I try to edit the file')
 def post_edit_view(fiddlefile, myclient):
     myclient.response= myclient.post(
@@ -99,6 +106,19 @@ def viewable(myclient):
 @then('A fiddle should be created')
 def fiddle_created(myclient):
     assert Fiddle.objects.count()==1
+@then('The fiddle should be copied')
+def copy_fiddle():
+    assert Fiddle.objects.count() == 2
+@then('I should own the copy')
+def own_file(user):
+    usr=User.objects.get(username=user)
+    assert any(fiddle.owner==usr for fiddle in Fiddle.objects.all())
+@then('I should be redirected to the file')
+def redirect_file(myclient):
+    assert myclient.response.url
+@then('Permission should be denied')
+def redirect_file(myclient):
+    assert myclient.response.status_code == 403
 @then('It should be edited')
 def file_edited(fiddlefile):
     fiddlefile.refresh_from_db()

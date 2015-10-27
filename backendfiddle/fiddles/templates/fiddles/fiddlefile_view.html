@@ -1,14 +1,8 @@
 {% extends 'base.html' %}
 {% block header %}
-    {% if user == object.fiddle.owner %}
     <a href="{% url 'file-edit' path=object.path pk=object.fiddle.id %}">
         <paper-button style="font-weight:bold;color:white">Edit File</paper-button>
     </a>
-    {% else %}
-        <a href="{% url 'fiddle-copy' pk=object.fiddle.id %}">
-            <paper-button style="font-weight:bold;color:white">Create new Fiddle from this one</paper-button>
-        </a>
-    {% endif %}
     <a href="{% url 'result' url="" pk=object.fiddle.id %}">
         <paper-button style="color:white">Result</paper-button>
     </a>
@@ -38,15 +32,17 @@
             top: 5px;
             border: none;
             left: 0;
-            width:50%;
+            width: 50%;
         }
-        #preview{
+
+        #preview {
             position: absolute;
-            right:0;
-            width:50%;
-            top:0;
-            bottom:0;
+            right: 0;
+            width: 50%;
+            top: 0;
+            bottom: 0;
         }
+
         #editor * {
             font-family: monospace
         }</style>
