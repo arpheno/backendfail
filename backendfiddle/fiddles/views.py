@@ -64,7 +64,6 @@ class EditFile(LoginRequiredMixin,FiddleMixin, UpdateView):
     model = FiddleFile
     fields = ["content"]
     template_name = "fiddles/fiddlefile_edit.html"
-
     def get_context_data(self, **kwargs):
         context = super(EditFile, self).get_context_data(**kwargs)
         context['file_content'] = self.get_object().content
