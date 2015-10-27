@@ -19,6 +19,9 @@ def test_edit_anon():
 @scenario('fiddlefiles.feature', 'Editing files with login')
 def test_edit():
     pass
+@scenario('fiddlefiles.feature', 'Viewing edit mode files with login')
+def test_view_edit():
+    pass
 @scenario('fiddlefiles.feature', 'Creating fiddles without login')
 def test_edit_create_anon():
     pass
@@ -58,8 +61,18 @@ def get_file(fiddlefile, myclient):
                              }
                      )
     )
-@when('I try to edit the file')
+@when('I try to access edit the file')
 def get_edit_view(fiddlefile, myclient):
+    myclient.response= myclient.get(
+        reverse_lazy('file-edit',
+                     kwargs={
+                         "pk":fiddlefile.fiddle.id,
+                         "path":fiddlefile.path
+                     }
+                     )
+    )
+@when('I try to edit the file')
+def post_edit_view(fiddlefile, myclient):
     myclient.response= myclient.post(
         reverse_lazy('file-edit',
                      kwargs={
@@ -80,6 +93,9 @@ def file_not_editable(myclient):
 @then('I should be redirected to the login')
 def redirected_login(myclient):
     assert "/login/github/" in myclient.response.url
+@then('I should be able to view it')
+def viewable(myclient):
+    assert myclient.response.status_code == 200
 @then('A fiddle should be created')
 def fiddle_created(myclient):
     assert Fiddle.objects.count()==1
