@@ -73,6 +73,7 @@
         var con = "{{ file_content|escapejs }}";
         console.log(con);
         editor.setValue(con, -1);
+        editor.setReadOnly(true);
         editor.setTheme("ace/theme/chrome");
         if (window.location.pathname.indexOf(".js") > -1)
             editor.getSession().setMode("ace/mode/javascript");

@@ -42,19 +42,19 @@ def test_django_launch_functional():
     c = Client()
     response = c.get(reverse_lazy('result',kwargs={"pk":obj.id,"url":""}))
     obj=DjangoFiddle.objects.get(pk=obj.id)
-    try:
+    try:# pragma: no cover
         assert response.status_code==200
         try:
             obj._stop()
             obj._remove()
             obj._delete_files()
-        except:
+        except:# pragma: no cover
             pass
-    except:
+    except: # pragma: no cover
         try:
             obj._stop()
             obj._remove()
             obj._delete_files()
-        except:
+        except:# pragma: no cover
             pass
         raise
