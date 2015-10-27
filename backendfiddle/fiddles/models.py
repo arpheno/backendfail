@@ -49,6 +49,9 @@ class Fiddle(models.Model):
     def _stop(self):
         with lcd(os.path.join('containers')):
             local('docker stop -t 1 ' + self.hash )
+    def _remove(self):
+        with lcd(os.path.join('containers')):
+            local('docker rm ' + self.hash )
 
     def _delete_files(self):
         with lcd(os.path.join('containers')):

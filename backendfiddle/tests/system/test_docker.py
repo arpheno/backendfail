@@ -39,8 +39,10 @@ def test_django_launch_functional():
     try:
         assert response.status_code==200
         obj._stop()
+        obj._remove()
         obj._delete_files()
     except:
         obj._stop()
+        obj._remove()
         obj._delete_files()
         raise
