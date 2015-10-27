@@ -5,21 +5,22 @@ from fabric.context_managers import lcd
 from fabric.operations import local
 # Create your models here.
 from fiddles.models import Fiddle
+from settings.basic import BASE_DIR
+import os
 
 
 class DjangoFiddle(Fiddle):
     def save(self, *args, **kwargs):
-        prefix = "dj/skeleton/"
+        prefix = os.path.join(BASE_DIR, "dj", "skeleton/")
         if not self.id:
             result = super(DjangoFiddle, self).save(*args, **kwargs)
-            import os
             for root, dirs, files in os.walk(prefix, topdown=False):
                 for name in files:
-                    path=os.path.join(root, name)
-                    if path.startswith(prefix,):
-                         path = path.replace(prefix, '', 1)
+                    path = os.path.join(BASE_DIR, root, name)
+                    if path.startswith(prefix, ):
+                        path = path.replace(prefix, '', 1)
                     print path
-                    with open(os.path.join(root,name)) as source:
+                    with open(os.path.join(root, name)) as source:
                         self.create_file(path, source.read())
         else:
             result = super(DjangoFiddle, self).save(*args, **kwargs)
@@ -27,7 +28,7 @@ class DjangoFiddle(Fiddle):
 
     def _launch(self):
         command = "python manage.py makemigrations && python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
-        with lcd(os.path.join('containers', self.hash)):
+        with lcd(os.path.join(BASE_DIR, 'containers', self.hash)):
             while True:  # Try to find a free port
                 port = randint(8001, 12000)
                 try:
@@ -37,7 +38,7 @@ class DjangoFiddle(Fiddle):
                     cmd.append('-w /usr/src/app')
                     cmd.append('-p ' + str(port) + ':8000')
                     cmd.append('-d django')
-                    cmd.append('bash -c "'+command+'"')
+                    cmd.append('bash -c "' + command + '"')
                     local(' '.join(cmd), capture=True)
                     self.port = port
                     self.save()

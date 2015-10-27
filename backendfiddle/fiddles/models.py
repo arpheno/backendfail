@@ -12,6 +12,7 @@ from model_utils.managers import InheritanceManager
 
 
 # Create your models here.
+from settings.basic import BASE_DIR
 
 
 def get_upload_path(instance, filename):
@@ -22,10 +23,11 @@ def create_file(path, content):
     import os
     print path
     try:
-        os.makedirs(os.path.join(os.path.split(path)[0]))
-    except OSError:
-        pass
-    with open(path, 'w') as file:
+        dirpath=os.path.join(BASE_DIR,os.path.join(os.path.split(path)[0]))
+        os.makedirs(dirpath)
+    except OSError as e:
+        print e
+    with open(os.path.join(BASE_DIR,path), 'w') as file:
         file.write(content)
 
 
@@ -47,14 +49,14 @@ class Fiddle(models.Model):
         # self._delete_files()
 
     def _stop(self):
-        with lcd(os.path.join('containers')):
+        with lcd(os.path.join(BASE_DIR,'containers')):
             local('docker stop -t 1 ' + self.hash )
     def _remove(self):
-        with lcd(os.path.join('containers')):
+        with lcd(os.path.join(BASE_DIR,'containers')):
             local('docker rm ' + self.hash )
 
     def _delete_files(self):
-        with lcd(os.path.join('containers')):
+        with lcd(os.path.join(BASE_DIR,'containers')):
             local("rm -rf " + self.hash)
 
     def _hash(self):
@@ -64,7 +66,7 @@ class Fiddle(models.Model):
         return self.hash
 
     def _write_files(self):
-        root = os.path.join("containers", self.hash)
+        root = os.path.join(BASE_DIR,"containers", self.hash)
         for fiddlefile in self.fiddlefile_set.all():
             create_file(os.path.join(root, fiddlefile.path), fiddlefile.content)
 

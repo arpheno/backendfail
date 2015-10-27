@@ -6,6 +6,7 @@ from fabric.operations import local
 from dj.factories import DjangoFiddleFactory
 from dj.models import DjangoFiddle
 from fiddles.factories import UserFactory, FiddleFactory
+from settings.basic import BASE_DIR
 
 
 @pytest.mark.django_db
@@ -22,7 +23,7 @@ def test_django_write_files():
     obj = DjangoFiddle.objects.get(id=obj.id)
     obj._hash()
     obj._write_files()
-    root = os.path.join("containers", obj.hash)
+    root = os.path.join(BASE_DIR,"containers", obj.hash)
     assert os.path.exists(root)
     assert os.path.exists(os.path.join(root, 'app'))
     assert os.path.exists(os.path.join(root, 'app', '__init__.py'))
