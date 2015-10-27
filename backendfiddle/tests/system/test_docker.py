@@ -21,11 +21,17 @@ def test_django_launch_unit():
     sleep(15)
     try:
         assert local('curl localhost:'+str(obj.port),capture=True).return_code == 0
-        obj._stop()
-        obj._delete_files()
+        try:
+            obj._stop()
+            obj._delete_files()
+        except:
+            pass
     except:
-        obj.cleanup()
-        obj._delete_files()
+        try:
+            obj.cleanup()
+            obj._delete_files()
+        except:
+            pass
         raise
 @pytest.mark.docker
 @pytest.mark.django_db
@@ -38,11 +44,17 @@ def test_django_launch_functional():
     obj=DjangoFiddle.objects.get(pk=obj.id)
     try:
         assert response.status_code==200
-        obj._stop()
-        obj._remove()
-        obj._delete_files()
+        try:
+            obj._stop()
+            obj._remove()
+            obj._delete_files()
+        except:
+            pass
     except:
-        obj._stop()
-        obj._remove()
-        obj._delete_files()
+        try:
+            obj._stop()
+            obj._remove()
+            obj._delete_files()
+        except:
+            pass
         raise
