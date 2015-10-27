@@ -3,7 +3,6 @@ argparse==1.2.1
 django-model-utils==2.3.1
 factory-boy==2.6.0
 pytest-django==2.9.1
-pytest-bdd
 fabric
 django-http-proxy
 django-debug-toolbar
