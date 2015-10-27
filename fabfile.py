@@ -16,6 +16,7 @@ def ddocker(project='djangoname0'):
         local(' '.join(cmd))
 
 def test():
-    return local(r'py.test -n 4 backendfiddle/fiddles/tests.py backendfiddle/dj/tests.py')
+    return local(r'py.test -n 4 tests')
 def coverage():
-    local(r'coverage run --omit="fabfile.py,settings/**" --source . -m py.test -m "not docker" backendfiddle/fiddles/tests.py backendfiddle/dj/tests.py')
+    with lcd("backendfiddle"):
+        local(r'coverage run --omit="fabfile.py,settings/**" --source . -m py.test tests')

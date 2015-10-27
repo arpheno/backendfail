@@ -15,10 +15,22 @@
     <link rel="import" href="{% static 'paper-item/paper-item.html' %}">
     <link rel="import" href="{% static 'paper-drawer-panel/paper-drawer-panel.html' %}">
     <style type="text/css">
-    *{font-family: 'Roboto', sans-serif;}
-    paper-toolbar{background-color: #0b8043 !important;}
-    h1 {font-size: 23px;}
-    h1,p,a {text-align: center;padding:20px;}
+        * {
+            font-family: 'Roboto', sans-serif;
+        }
+
+        paper-toolbar {
+            background-color: #0b8043 !important;
+        }
+
+        h1 {
+            font-size: 23px;
+        }
+
+        h1, p, a {
+            text-align: center;
+            padding: 20px;
+        }
     </style>
     <link href='https://fonts.googleapis.com/css?family=Roboto' rel='stylesheet' type='text/css'>
     <link rel="import" href="{% static 'polymer/polymer.html' %}">
@@ -27,7 +39,9 @@
 <paper-drawer-panel>
     <paper-header-panel drawer>
         <paper-toolbar>
-            <a href="/"><div style="color:white;text-underline: none">Backendfiddle</div></a>
+            <a href="/">
+                <div style="color:white;text-underline: none">Backendfiddle</div>
+            </a>
         </paper-toolbar>
         <nav>
             {% block nav %}
@@ -39,6 +53,20 @@
             <paper-icon-button icon="menu" paper-drawer-toggle></paper-icon-button>
             {% block header %}
             {% endblock %}
+            <span style="position: absolute;right: 0;top:0;bottom: 0;display: flex;align-items:center;">
+            {% if not user %}
+                <a href="/login/github/">
+                    <paper-button style="color:white !important;">Sign Up</paper-button>
+                </a>
+                <a href="/login/github/">
+                    <paper-button style="color:white !important;">Log In</paper-button>
+                </a>
+            {% else %}
+                <a href="/login/github/">
+                    {{ user.username}}
+                </a>
+            {% endif %}
+            </span>
         </paper-toolbar>
         <main style="display:flex;justify-content: center;align-items: center;align-content: center;
         position: absolute;left:0;right: 0;top:0;bottom:0;">

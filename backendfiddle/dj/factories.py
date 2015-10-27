@@ -14,7 +14,7 @@ class DjangoFiddleFactory(factory.DjangoModelFactory):
             # Simple build, do nothing.
             return
         self.save()
-        obj = FiddleFileFactory(path="app/templates/app",fiddle=self)
+        obj = FiddleFileFactory(path="app/templates/app/app.html",fiddle=self)
         obj.save()
         obj = FiddleFileFactory(path="app/__init__.py",fiddle=self)
         obj.save()

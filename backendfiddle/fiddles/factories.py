@@ -16,7 +16,7 @@ class UserFactory(factory.DjangoModelFactory):
 class FiddleFileFactory(factory.Factory):
     class Meta:
         model = FiddleFile
-    content = "lol"
+    content = ""
     path="your mom"
 
 class FiddleFactory(factory.Factory):
