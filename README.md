@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/arpheno/backendfiddle.svg?branch=master)](https://travis-ci.org/arpheno/backendfiddle)
+[![Circle CI](https://circleci.com/gh/arpheno/backendfiddle.svg?style=svg)](https://circleci.com/gh/arpheno/backendfiddle)
 [![Coverage Status](https://coveralls.io/repos/arpheno/backendfiddle/badge.svg?branch=master&service=github)](https://coveralls.io/github/arpheno/backendfiddle?branch=master)
 
 **Backendfiddle**
