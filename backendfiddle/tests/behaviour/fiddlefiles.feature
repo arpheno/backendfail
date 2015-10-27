@@ -12,3 +12,8 @@ Scenario: Editing files without login
     And There is a file
     When I try to edit the file
     Then I should be redirected to the login
+
+Scenario: Creating fiddles without login
+    Given I'm not logged in
+    When I try to create a fiddle
+    Then I should be redirected to the login

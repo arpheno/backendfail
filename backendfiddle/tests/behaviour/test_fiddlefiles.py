@@ -6,11 +6,14 @@ from fiddles.factories import FiddleFactory
 
 
 @scenario('fiddlefiles.feature', 'Viewing files without login')
-def test_view():
+def test_view_anon():
     pass
 
 @scenario('fiddlefiles.feature', 'Editing files without login')
-def test_edit():
+def test_edit_anon():
+    pass
+@scenario('fiddlefiles.feature', 'Creating fiddles without login')
+def test_edit_create_anon():
     pass
 
 @given("I'm not logged in")
@@ -46,3 +49,8 @@ def get_edit_view(fiddlefile, client):
 @then('I should be redirected to the login')
 def redirected_login(client):
     assert "/login/github/" in client.response.url
+@when('I try to create a fiddle')
+def get_create_view(fiddlefile, client):
+    client.response= client.get(
+        reverse_lazy('fiddle-create',kwargs={"class":"Fiddle"})
+    )
