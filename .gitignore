@@ -1,4 +1,4 @@
-/.coverage
+/.coverage/
 /.cache
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -24,7 +24,8 @@ sdist/
 /backendfiddle/db.sqlite3
 /backendfiddle/settings/secret.py
 var/
-/backendfiddle/components
+/backendfiddle/components/**
+!/backendfiddle/components/__init__.py
 *.egg-info/
 .installed.cfg
 *.egg
