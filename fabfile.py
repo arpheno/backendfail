@@ -1,8 +1,7 @@
 from fabric.context_managers import lcd, cd, prefix
 from fabric.operations import local, sudo, run
-
-
 from fabric.api import *
+
 
 def test():
     with lcd('backendfail'):
@@ -53,10 +52,14 @@ def recruit(user):
             sudo("echo '" + pubkey + "' >> /home/" + user + "/.ssh/authorized_keys")
     except:
         sudo("echo '" + pubkey + "' >> /home/" + user + "/.ssh/authorized_keys")
+
+
 def copy_secret(root="/var/www/bf"):
     secret = local("cat backendfail/settings/secret.py", capture=True)
     with cd(root + "/backendfail/settings"):
-        run("echo '"+secret+"' > secret.py")
+        run("echo '" + secret + "' > secret.py")
+
+
 def init_git():
     sudo("apt-get install git")
     sudo("mkdir backendfail -p")
@@ -69,11 +72,12 @@ def init_git():
         pass
     with cd("backendfail/hooks"):
         postreceive = """'#!/bin/bash
-        git --work-tree=/var/www/bf/ checkout -f master
-        cd /var/www/bf/backendfail && python manage.py migrate
-        cd /var/www/bf/backendfail && python manage.py collectstatic --noinput
-        cd /var/www/bf/backendfail && bower install
-        sudo service supervisor restart'"""
+git --work-tree=/var/www/bf/ checkout -f master
+source /var/www/bf/env/bin/activate && cd /var/www/bf/ && pip install -r requirements
+source /var/www/bf/env/bin/activate && cd /var/www/bf/backendfail && python manage.py migrate
+source /var/www/bf/env/bin/activate && cd /var/www/bf/backendfail && python manage.py collectstatic --noinput
+source /var/www/bf/env/bin/activate && cd /var/www/bf/backendfail && bower install
+sudo service supervisor restart'"""
         run(" echo " + postreceive + " >post-receive")
         sudo("mkdir -p /var/www/bf")
         sudo("chown -R backendfail /var/www/bf")
@@ -146,6 +150,8 @@ def deploy():
         copy_secret()
         management_commands()
         daemons()
+
+
 def clean():
     try:
         local("git remote rm production")
@@ -155,5 +161,3 @@ def clean():
         local("rm -rf ~/backendfail/")
     except:
         pass
-
-
