@@ -13,9 +13,10 @@ class UserFactory(factory.DjangoModelFactory):
     is_superuser = True
     is_staff = True
     is_active = True
-class FiddleFileFactory(factory.Factory):
+class FiddleFileFactory(factory.DjangoModelFactory):
     class Meta:
         model = FiddleFile
+        django_get_or_create =['fiddle','path']
     content = ""
     path="your mom"
 

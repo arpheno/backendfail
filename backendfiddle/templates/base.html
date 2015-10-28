@@ -1,10 +1,10 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
+<link rel="stylesheet" href="{% static 'reset.css' %}">
 <head>
     <meta charset="UTF-8">
     <title>Backendfiddle</title>
-    <link rel="stylesheet" href="{% static 'reset.css' %}">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.4/jquery.js"></script>
     <script src="{% static 'webcomponentsjs/webcomponents.js' %}"></script>
     <link rel="import" href="{% static 'paper-styles/paper-styles.html' %}">
@@ -12,7 +12,8 @@
     <link rel="import" href="{% static 'paper-toolbar/paper-toolbar.html' %}">
     <link rel="import" href="{% static 'paper-tabs/paper-tabs.html' %}">
     <link rel="import" href="{% static 'paper-button/paper-button.html' %}">
-    <link rel="import" href="{% static 'paper-item/paper-item.html' %}">
+    <link rel="import" href="{% static 'paper-icon-button/paper-icon-button.html' %}">
+    <link rel="import" href="{% static 'paper-card/paper-card.html' %}">
     <link rel="import" href="{% static 'paper-drawer-panel/paper-drawer-panel.html' %}">
     <style type="text/css">
         * {
@@ -27,10 +28,61 @@
             font-size: 23px;
         }
 
-        h1, p, a {
+        h1, p {
             text-align: center;
             padding: 20px;
         }
+
+        ul {
+            list-style: circle;
+            display: flex;
+            flex-wrap: wrap;;
+        }
+
+        ul > a {
+            margin: 3px;
+            flex: 1 1 100%;
+            display: flex;
+            align-items: center;
+            text-underline: none;
+            text-decoration: none;
+            color: black;
+            font-weight: bold;
+        }
+
+        ul > a > paper-card {
+            flex: 1 1 100%;
+            padding: 8px;
+        }
+
+        ul > a:before {
+            content: '-';
+            margin-right: 3px;
+        }
+        #preview{
+            margin:5px;
+            border:1px inset;
+            position: absolute;
+            right:0;
+            width:50%;
+            width:calc(50% - 10px);
+            top:0;
+            bottom:20px;
+            height:100%;
+            height:calc(100% - 30px);
+        }
+        textarea, #editor {
+            position: absolute;
+            bottom: 0;
+            top: 5px;
+            border: none;
+            left: 0;
+            width:50%;
+        }
+        #editor * {
+            font-family: monospace
+        }
+        #drawer{z-index:15;}
     </style>
     <link href='https://fonts.googleapis.com/css?family=Roboto' rel='stylesheet' type='text/css'>
     <link rel="import" href="{% static 'polymer/polymer.html' %}">
@@ -40,7 +92,7 @@
     <paper-header-panel drawer>
         <paper-toolbar>
             <a href="/">
-                <div style="color:white;text-underline: none">Backendfiddle</div>
+                <div style="color:white;text-underline: none">backendfiddle</div>
             </a>
         </paper-toolbar>
         <nav>
@@ -62,8 +114,8 @@
                     <paper-button style="color:white !important;">Log In</paper-button>
                 </a>
             {% else %}
-                <a href="/login/github/">
-                    {{ user.username}}
+                <a href="/login/github/" style="color:white;text-decoration: none;padding:10px;">
+                    {{ user.username }}
                 </a>
             {% endif %}
             </span>
@@ -76,5 +128,19 @@
     </paper-header-panel>
 </paper-drawer-panel>
 
+<footer style="display: flex;z-index:1000;align-content:center;align-items:center;justify-content: space-around;background-color: #0b8043;padding:0;position:fixed;bottom: 0;height:20px;left:0;right:0">
+    <p style="padding:0;color:white;">
+        Please note that this is a beta version.
+        <a style="padding: 2px;text-decoration: none;color:lightblue;" href="https://github.com/arpheno/backendfiddle/">
+            Contribute on Github
+        </a>
+    </p>
+    <p style="padding:0;color:white;">
+        ©2015
+        <a style="padding: 2px;text-decoration: none;color:lightblue;" href="https://careers.stackoverflow.com/sswozny">
+            Sebastian Wozny
+        </a>
+    </p>
+</footer>
 </body>
 </html>

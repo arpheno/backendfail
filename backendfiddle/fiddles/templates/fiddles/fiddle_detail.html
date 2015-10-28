@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load static %}
 {% block header %}
     <a href="{% url 'result' url="" pk=object.id %}">
         <paper-button style="color:white">Result</paper-button>
@@ -8,26 +9,38 @@
     <paper-button style="color:white" onclick="iframe_forward();">Forward</paper-button>
 {% endblock %}
 {% block nav %}
+    <h1> Project files</h1>
     <ul>
         {% for file in object.fiddlefile_set.all %}
-            <a href="{{ file.get_absolute_url }}">
-                <paper-item>
-                    <paper-item-body two-line>
-                        <div>{{ file.path }}</div>
-                        <div secondary></div>
-                    </paper-item-body>
-                </paper-item>
-            </a>
+            {% if user == object.owner %}
+                <a href="{% url 'file-edit' pk=object.id path=file.path %}">
+            {% else %}
+                <a href="{% url 'file-view' pk=object.id path=file.path %}">
+            {% endif %}
+        <paper-card>
+            {{ file.path }}
+        </paper-card>
+        </a>
         {% endfor %}
     </ul>
 {% endblock %}
 {% block content %}
-    <div> Click one of the files on the left to start editing!</div>
-    <div id="preview" style="height:100%;">
-        <h1> You will see the result here.</h1>
-
-        <p>Since a new container will be spawned, this might take a while.</p>
-    </div>
+    <div id="click"> Click one of the files on the left to start editing!</div>
+    <iframe id="preview" src="{% static 'loading.html' %}"></iframe>
+    <style type="text/css">
+        #click{
+            position: absolute;
+            bottom: 0;
+            top: 5px;
+            border: none;
+            left: 0;
+            width:50%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+    </style>
     <script>
         function iframe_back() {
             $("#preview iframe").contentWindow.history.back();
@@ -40,7 +53,7 @@
         }
 
         $(function () {
-            $("#preview").append($("<iframe>").attr('src', '/{{ object.id }}/result/'))
-        })
+            $("iframe").attr('src', '/{{ object.id }}/result/');
+        });
     </script>
 {% endblock %}

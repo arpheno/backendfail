@@ -10,15 +10,20 @@ import os
 
 
 class DjangoFiddle(Fiddle):
+    @property
+    def prefix(self):
+        return os.path.join(BASE_DIR, "dj", "skeleton/")
+    @property
+    def entrypoint(self):
+        return "app/templates/app/app.html"
     def save(self, *args, **kwargs):
-        prefix = os.path.join(BASE_DIR, "dj", "skeleton/")
         if not self.id:
             result = super(DjangoFiddle, self).save(*args, **kwargs)
-            for root, dirs, files in os.walk(prefix, topdown=False):
+            for root, dirs, files in os.walk(self.prefix, topdown=False):
                 for name in files:
                     path = os.path.join(BASE_DIR, root, name)
-                    if path.startswith(prefix, ):
-                        path = path.replace(prefix, '', 1)
+                    if path.startswith(self.prefix, ):
+                        path = path.replace(self.prefix, '', 1)
                     print path
                     with open(os.path.join(root, name)) as source:
                         self.create_file(path, source.read())

@@ -5,6 +5,7 @@ from django.test import Client
 from pytest_bdd import scenario, given, when, then
 from pytest_bdd.parsers import re
 
+from dj.factories import DjangoFiddleFactory
 from fiddles.factories import FiddleFactory, UserFactory
 from fiddles.models import Fiddle
 
@@ -48,7 +49,7 @@ def myclient(user,client,admin_client):
 
 @given("There is a file")
 def fiddlefile(db):
-    return FiddleFactory().fiddlefile_set.first()
+    return DjangoFiddleFactory().fiddlefile_set.first()
 @given("I own the file")
 def obtain(fiddlefile,user):
     fiddlefile.fiddle.owner=User.objects.get(username=user)
@@ -91,7 +92,7 @@ def post_edit_view(fiddlefile, myclient):
 @when('I try to create a fiddle')
 def get_create_view(myclient):
     myclient.response= myclient.get(
-        reverse_lazy('fiddle-create',kwargs={"class":"Fiddle"})
+        reverse_lazy('fiddle-create',kwargs={"class":"DjangoFiddle"})
     )
 
 @then('I should not be able to edit it')

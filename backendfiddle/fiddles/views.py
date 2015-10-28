@@ -4,7 +4,7 @@ from django.core.exceptions import PermissionDenied
 from django.core.urlresolvers import reverse_lazy
 from django.shortcuts import render, redirect
 # Create your views here.
-from django.views.generic import View, DetailView, UpdateView, ListView, CreateView
+from django.views.generic import View, DetailView, UpdateView, ListView, CreateView, TemplateView
 from httpproxy.views import HttpProxy
 from fiddles.models import Fiddle, FiddleFile
 from fiddles import models
@@ -38,8 +38,12 @@ class DynProxyView(FiddleMixin, HttpProxy):
         destroying or stopping the container.
         """
         self.get_object().spawn()
-        time.sleep(15)
-        result = super(DynProxyView, self).dispatch(request, url, *args, **kwargs)
+        while True:
+            try:
+                result = super(DynProxyView, self).dispatch(request, url, *args, **kwargs)
+                break
+            except:
+                time.sleep(1)
         self.get_object().cleanup()
         return result
 
@@ -118,8 +122,8 @@ class FiddleView(FiddleMixin, DetailView):
     template_name = 'fiddles/fiddle_detail.html'
 
 
-class FiddleList(FiddleMixin, ListView):
-    model = Fiddle
+class FiddleList(TemplateView):
+    template_name = "fiddles/fiddle_list.html"
 
 
 class CreateFiddle(LoginRequiredMixin, View):
@@ -136,4 +140,6 @@ class CreateFiddle(LoginRequiredMixin, View):
             return getattr(djmodels, self.kwargs["class"])
 
     def get_success_url(self):
-        return reverse_lazy("fiddle-detail", kwargs={"pk": self.object.id})
+        return reverse_lazy("file-edit",
+                            kwargs={"pk": self.object.id,
+                                    "path":self.object.entrypoint})

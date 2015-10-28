@@ -1,21 +1,86 @@
 {% extends 'base.html' %}
+{% load static %}
 {% block content %}
     <style type="text/css">
-    main{
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
+        main {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #drawer {
+            width: 0 !important;
+        }
+
+        #main {
+            left: 0 !important;
+        }
+
+        #foreground {
+            position: fixed;
+            left: 0;
+            top:0;
+            right: 0;
+            bottom: 0;
+            display: flex;
+            flex-wrap: wrap;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            align-content: center;
+        }
+        #background{
+            position: fixed;
+            top: 50px;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            display: flex;
+            flex-wrap: wrap;
+            flex-direction: row;
+            justify-content: space-around;
+            align-items: center;
+            align-content: space-around;
+        }
+
+        #background div {
+            flex: 1 1 30%;
+            display: flex;
+            height: 20vh;
+            align-items: center;
+            align-content: center;
+            justify-content: center;
+        }
+
+        #background img {
+            height: 20vh;
+        }
+    p{
+        font-size: 18px;
     }
-    #drawer{
-        width:0 !important;
-    }
-    #main{
-        left:0 !important;
-    }
+        paper-toolbar,footer {
+            background-color: #5a5a5a !important;
+        }
     </style>
-    <h1>Welcome to backendfiddle!</h1>
-    <p>This is a place where you can try out backend code for web applications using platforms such as django
-    or Ruby on Rails.</p>
-    <a href="{% url 'fiddle-create' class="DjangoFiddle" %}"><paper-button raised>Create new Fiddle</paper-button></a>
+    <div id="background" >
+        <div><img src="{% static 'django-logo-positive.svg' %}"></div>
+        <div style="flex:0 0 13%;"></div>
+        <div><img src="{% static 'nodejs-logo.svg' %}"></div>
+        <div><img src="{% static 'rails-logo.svg' %}"></div>
+        <div><img src="{% static 'flask-logo.svg' %}"></div>
+        <div><img src="{% static 'laravel-logo.svg' %}"></div>
+    </div>
+    <div id="foreground" style="background-color: rgba(0, 0, 0, 0.5)">
+        <h1 style="padding:30px;margin-bottom:10px;font-size: 10vh;color:#fff;font-weight: 200;">backendfiddle</h1>
+    <paper-card elevation=5 style="text-align: center;padding:10px;width:100%;background-color: rgba(255, 255, 255, 0.9)">
+    <p>This is a place where you can try out backend code for web applications
+        using frameworks like django. Currently only django is supported.</p>
+    <p>Your app will be run in a live docker container, just like it would be run
+        in an actual deployment environment.</p>
+    <a href="{% url 'fiddle-create' class="DjangoFiddle" %}">
+        <paper-button raised style="background-color: #106645;color:white">Create new DjangoFiddle</paper-button>
+    </a>
+        </paper-card>
+    </div>
 {% endblock %}
