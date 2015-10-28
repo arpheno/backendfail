@@ -69,7 +69,10 @@ def init_git():
         pass
     with cd("backendfail/hooks"):
         postreceive = """'#!/bin/bash
-        git --work-tree=/var/www/bf/ checkout -f master'"""
+        git --work-tree=/var/www/bf/ checkout -f master
+        cd /var/www/bf/backendfail && python manage.py migrate
+        cd /var/www/bf/backendfail && python manage.py collectstatic --noinput
+        sudo service supervisor restart'"""
         run(" echo " + postreceive + " >post-receive")
         sudo("mkdir -p /var/www/bf")
         sudo("chown -R backendfail /var/www/bf")
