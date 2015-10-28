@@ -72,6 +72,7 @@ def init_git():
         git --work-tree=/var/www/bf/ checkout -f master
         cd /var/www/bf/backendfail && python manage.py migrate
         cd /var/www/bf/backendfail && python manage.py collectstatic --noinput
+        cd /var/www/bf/backendfail && bower install
         sudo service supervisor restart'"""
         run(" echo " + postreceive + " >post-receive")
         sudo("mkdir -p /var/www/bf")
