@@ -35,7 +35,7 @@ class DjangoFiddle(Fiddle):
         command = "python manage.py makemigrations && python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
         with lcd(os.path.join(BASE_DIR, 'containers', self.hash)):
             while True:  # Try to find a free port
-                port = randint(8001, 12000)
+                port = randint(8050, 12000)
                 try:
                     cmd = ["docker run"]
                     cmd.append('--name ' + self.hash)

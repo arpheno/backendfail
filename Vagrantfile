@@ -21,6 +21,9 @@ Vagrant.configure(2) do |config|
   config.vm.provision "shell" do |s|
     s.inline = "groupadd -f docker"
   end
+  config.vm.provider "virtualbox" do |v|
+    v.customize ["setextradata", :id, "VBoxInternal2/SharedFoldersEnableSymlinksCreate/v-root", "1"]
+end
 
    config.vm.provision "docker" do |d|
     #d.run "selenium/standalone-chrome",

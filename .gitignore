@@ -28,6 +28,7 @@ var/
 !/backendfiddle/components/__init__.py
 *.egg-info/
 /backendfiddle/containers
+/env
 .installed.cfg
 *.egg
 
