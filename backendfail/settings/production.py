@@ -9,7 +9,7 @@ from basic import *
 
 INSTALLED_APPS
 SECRET_KEY
-ALLOWED_HOSTS = ['.backendfail.xyz', '.djfiddle.xyz', 'localhost']
+ALLOWED_HOSTS = ['backend.fail', 'localhost']
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
@@ -32,7 +32,6 @@ def show_toolbar(request):
 DEBUG_TOOLBAR_CONFIG={
     "SHOW_TOOLBAR_CALLBACK" : show_toolbar
 }
-DEBUG=True
 
 CACHE_MIDDLEWARE_ALIAS="default"
 CACHE_MIDDLEWARE_SECONDS=30
