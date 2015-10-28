@@ -73,7 +73,7 @@ def init_git():
     with cd("backendfail/hooks"):
         postreceive = """'#!/bin/bash
 git --work-tree=/var/www/bf/ checkout -f master
-source /var/www/bf/env/bin/activate && cd /var/www/bf/ && pip install -r requirements
+source /var/www/bf/env/bin/activate && cd /var/www/bf/ && pip install -r requirements.txt
 source /var/www/bf/env/bin/activate && cd /var/www/bf/backendfail && python manage.py migrate --settings=settings.production
 source /var/www/bf/env/bin/activate && cd /var/www/bf/backendfail && python manage.py collectstatic --noinput
 source /var/www/bf/env/bin/activate && cd /var/www/bf/backendfail && bower install
