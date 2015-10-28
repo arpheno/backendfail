@@ -77,12 +77,13 @@
         <h1 style="margin-bottom:40px;font-size: 10vh;color:#fff;font-weight: 700;">Show me the Code</h1>
     <paper-card elevation=5 style="text-align: center;padding:10px;width:100%;background-color: rgba(255, 255, 255, 0.9)">
     <p>This is a place where you can try out backend code for web applications
-        using frameworks like django. Currently only django is supported.</p>
+        using frameworks like django. <span style="font-weight: 400;">Currently only django is supported.</span></p>
     <p>Your app will be run in a live docker container, just like it would be run
         in an actual deployment environment.</p>
         </paper-card>
-        <a href="{% url 'fiddle-create' class="DjangoFiddle" %}">
-            <paper-button raised style="background-color: #14ae7b;color:white">Create new DjangoFiddle</paper-button>
+        <a href="{% url 'fiddle-create' class="DjangoFiddle" %}" style="padding:30px;">
+            <paper-button raised elevation=5 style="background-color: #14ae7b;color:white">Create new DjangoFiddle
+            </paper-button>
         </a>
     </div>
 {% endblock %}
