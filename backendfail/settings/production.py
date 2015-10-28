@@ -1,15 +1,15 @@
 try:
     from secret import DATABASE_NAME, DATABASE_PASSWORD, DATABASE_USER, SECRET_KEY
 except:
-    DATABASE_NAME = "backendfiddle"
-    DATABASE_PASSWORD =  "backendfiddle"
-    DATABASE_USER =  "backendfiddle"
+    DATABASE_NAME = "backendfail"
+    DATABASE_PASSWORD = "backendfail"
+    DATABASE_USER = "backendfail"
     SECRET_KEY = "Lasjod"
 from basic import *
 
 INSTALLED_APPS
 SECRET_KEY
-ALLOWED_HOSTS = ['.backendfiddle.xyz','.djfiddle.xyz', 'localhost']
+ALLOWED_HOSTS = ['.backendfail.xyz', '.djfiddle.xyz', 'localhost']
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',

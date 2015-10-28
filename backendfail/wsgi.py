@@ -1,5 +1,5 @@
 """
-WSGI config for backendfiddle project.
+WSGI config for backendfail project.
 
 It exposes the WSGI callable as a module-level variable named ``application``.
 

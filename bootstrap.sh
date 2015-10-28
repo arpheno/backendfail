@@ -5,6 +5,6 @@ sudo ln -s /usr/bin/nodejs /usr/bin/node
 sudo npm install -g bower
 sudo pip install pytest-django pytest-xdist coverage
 sudo pip install -r /vagrant/requirements.txt
-cd /vagrant/backendfiddle/
+cd /vagrant/backendfail/
 bower install --allow-root
 python manage.py migrate

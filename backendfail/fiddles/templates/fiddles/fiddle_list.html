@@ -72,15 +72,17 @@
         <div><img src="{% static 'laravel-logo.svg' %}"></div>
     </div>
     <div id="foreground" style="background-color: rgba(0, 0, 0, 0.5)">
-        <h1 style="padding:30px;margin-bottom:10px;font-size: 10vh;color:#fff;font-weight: 200;">backendfiddle</h1>
+        <h2 style="font-size: 7vh;color:#fff;font-weight: 100;">talk is cheap...</h2>
+
+        <h1 style="margin-bottom:40px;font-size: 10vh;color:#fff;font-weight: 700;">Show me the Code</h1>
     <paper-card elevation=5 style="text-align: center;padding:10px;width:100%;background-color: rgba(255, 255, 255, 0.9)">
     <p>This is a place where you can try out backend code for web applications
         using frameworks like django. Currently only django is supported.</p>
     <p>Your app will be run in a live docker container, just like it would be run
         in an actual deployment environment.</p>
-    <a href="{% url 'fiddle-create' class="DjangoFiddle" %}">
-        <paper-button raised style="background-color: #106645;color:white">Create new DjangoFiddle</paper-button>
-    </a>
         </paper-card>
+        <a href="{% url 'fiddle-create' class="DjangoFiddle" %}">
+            <paper-button raised style="background-color: #14ae7b;color:white">Create new DjangoFiddle</paper-button>
+        </a>
     </div>
 {% endblock %}

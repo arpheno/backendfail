@@ -1,9 +1,9 @@
-[![Circle CI](https://circleci.com/gh/arpheno/backendfiddle.svg?style=svg)](https://circleci.com/gh/arpheno/backendfiddle)
-[![Coverage Status](https://coveralls.io/repos/arpheno/backendfiddle/badge.svg?branch=master&service=github)](https://coveralls.io/github/arpheno/backendfiddle?branch=master)
+[![Circle CI](https://circleci.com/gh/arpheno/backendfail.svg?style=svg)](https://circleci.com/gh/arpheno/backendfail)
+[![Coverage Status](https://coveralls.io/repos/arpheno/backendfail/badge.svg?branch=master&service=github)](https://coveralls.io/github/arpheno/backendfail?branch=master)
 
-**Backendfiddle**
+**backendfail**
 
-Backendfiddle is a place where server side
+backendfail is a place where server side
 behaviour can be displayed to explain complex code.
 
 We try to make it easier for beginners to start programming

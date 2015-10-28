@@ -5,12 +5,12 @@ from fabric.operations import local, sudo, run
 from fabric.api import *
 
 def test():
-    with lcd('backendfiddle'):
+    with lcd('backendfail'):
         local('py.test django/test.py')
 
 
 def ddocker(project='djangoname0'):
-    with lcd("backendfiddle/media/djangoname0"):
+    with lcd("backendfail/media/djangoname0"):
         cmd = ["docker run"]
         cmd.append("--name " + project)
         cmd.append('-v "$PWD":/usr/src/app')
@@ -27,7 +27,7 @@ def test():
 
 def coverage():
     local(
-        r'coverage run --omit="backendfiddle/ror/**,backendfiddle/tests/**,backendfiddle/settings/**,**/skeleton/**" --source backendfiddle -m py.test backendfiddle/tests')
+        r'coverage run --omit="backendfail/ror/**,backendfail/tests/**,backendfail/settings/**,**/skeleton/**" --source backendfail -m py.test backendfail/tests')
 
 
 def graphite():
@@ -40,37 +40,39 @@ def selenium():
 
 def postgresql():
     try:
-        sudo(r"docker run  --name postgresql -p 5432:5432 -e 'DB_USER=backendfiddle' -e 'DB_NAME=backendfiddle' -e 'DB_PASS=backendfiddle' -d sameersbn/postgresql")
+        sudo(
+            r"docker run  --name postgresql -p 5432:5432 -e 'DB_USER=backendfail' -e 'DB_NAME=backendfail' -e 'DB_PASS=backendfail' -d sameersbn/postgresql")
     except:
         sudo(r"docker start postgresql")
 
 
-
-
-# def recruit(user=env.hosts[0].split("@")[0]):
-#     pubkey=local("cat ~/.ssh/id_rsa.pub",capture=True)
-#     if not pubkey in sudo("cat /home/"+user+"/.ssh/authorized_keys"):
-#         sudo("echo '"+pubkey+"' >> /home/"+user+"/.ssh/authorized_keys")
+def recruit(user):
+    pubkey = local("cat ~/.ssh/id_rsa.pub", capture=True)
+    try:
+        if not pubkey in sudo("cat /home/" + user + "/.ssh/authorized_keys"):
+            sudo("echo '" + pubkey + "' >> /home/" + user + "/.ssh/authorized_keys")
+    except:
+        sudo("echo '" + pubkey + "' >> /home/" + user + "/.ssh/authorized_keys")
 def copy_secret(root="/var/www/bf"):
-    secret = local("cat backendfiddle/settings/secret.py",capture=True)
-    with cd(root+"/backendfiddle/settings"):
+    secret = local("cat backendfail/settings/secret.py", capture=True)
+    with cd(root + "/backendfail/settings"):
         run("echo '"+secret+"' > secret.py")
 def init_git():
     sudo("apt-get install git")
-    sudo("mkdir backendfiddle -p")
-    sudo("chown -R backendfiddle /home/backendfiddle")
-    with cd("backendfiddle"):
+    sudo("mkdir backendfail -p")
+    sudo("chown -R backendfail /home/backendfail")
+    with cd("backendfail"):
         run("git init --bare")
     try:
-        local("git remote add production backendfiddle@" + env.hosts[0].split("@")[1] + ":backendfiddle")
+        local("git remote add production backendfail@" + env.hosts[0].split("@")[1] + ":backendfail")
     except:
         pass
-    with cd("backendfiddle/hooks"):
+    with cd("backendfail/hooks"):
         postreceive = """'#!/bin/bash
         git --work-tree=/var/www/bf/ checkout -f master'"""
         run(" echo " + postreceive + " >post-receive")
         sudo("mkdir -p /var/www/bf")
-        sudo("chown -R backendfiddle /var/www/bf")
+        sudo("chown -R backendfail /var/www/bf")
         run(" chmod +x post-receive")
 
     local("git push production master")
@@ -78,12 +80,12 @@ def init_git():
 
 def create_users():
     sudo(" id -u gunicorn &>/dev/null || useradd gunicorn ")
-    sudo(" id -u backendfiddle &>/dev/null || useradd backendfiddle ")
-    sudo("adduser backendfiddle sudo")
-    sudo("adduser backendfiddle docker")
-    sudo("mkdir -p /home/backendfiddle/.ssh")
+    sudo(" id -u backendfail &>/dev/null || useradd backendfail ")
+    sudo("adduser backendfail sudo")
+    sudo("adduser backendfail docker")
+    sudo("mkdir -p /home/backendfail/.ssh")
     sudo("echo \"ALL ALL=(ALL) NOPASSWD: ALL\" >> /etc/sudoers")
-    recruit("backendfiddle")
+    recruit("backendfail")
 
 
 def install_deploy_dependencies():
@@ -108,18 +110,18 @@ def install_requirements(root='/var/www/bf'):
     with cd(root), prefix("source env/bin/activate"):
         run("pip install -r requirements.txt")
         run("pip install gunicorn psycopg2 python-memcached")
-    with cd(root+"/backendfiddle"):
+    with cd(root + "/backendfail"):
         run("bower install")
 
 
 def symlink_config(root='/var/www/bf'):
     sudo("rm -f /etc/nginx/sites-enabled/default")
-    sudo("ln -sfn " + root + "/conf/supervisor.conf /etc/supervisor/conf.d/backendfiddle.conf -f")
-    sudo("ln -sfn " + root + "/conf/nginx.conf /etc/nginx/sites-enabled/backendfiddle.conf -f")
+    sudo("ln -sfn " + root + "/conf/supervisor.conf /etc/supervisor/conf.d/backendfail.conf -f")
+    sudo("ln -sfn " + root + "/conf/nginx.conf /etc/nginx/sites-enabled/backendfail.conf -f")
 
 
 def management_commands(root='/var/www/bf'):
-    with cd(root+"/backendfiddle"), prefix("source "+root+"/env/bin/activate"):
+    with cd(root + "/backendfail"), prefix("source " + root + "/env/bin/activate"):
         run("python manage.py migrate --settings=settings.production")
         run("python manage.py collectstatic --noinput  --settings=settings.production")
 
@@ -130,7 +132,7 @@ def daemons():
 
 
 def deploy():
-    with settings(user="backendfiddle"):
+    with settings(user="backendfail"):
         init_git()
         install_deploy_dependencies()
         postgresql()
@@ -146,7 +148,7 @@ def clean():
     except:
         pass
     try:
-        local("rm -rf ~/backendfiddle/")
+        local("rm -rf ~/backendfail/")
     except:
         pass
 
