@@ -77,7 +77,8 @@ source /var/www/bf/env/bin/activate && cd /var/www/bf/ && pip install -r require
 source /var/www/bf/env/bin/activate && cd /var/www/bf/backendfail && python manage.py migrate --settings=settings.production
 source /var/www/bf/env/bin/activate && cd /var/www/bf/backendfail && python manage.py collectstatic --noinput
 source /var/www/bf/env/bin/activate && cd /var/www/bf/backendfail && bower install
-sudo service supervisor restart'"""
+sudo service supervisor restart
+sudo nginx -s reload'"""
         run(" echo " + postreceive + " >post-receive")
         sudo("mkdir -p /var/www/bf")
         sudo("chown -R backendfail /var/www/bf")
