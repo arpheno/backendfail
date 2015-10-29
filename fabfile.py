@@ -37,6 +37,8 @@ def selenium():
     local(r"docker run --name selenium -d -p 4444:4444 -v /dev/shm:/dev/shm selenium/standalone-chrome")
 
 
+def rabbitmq():
+    local("docker run -d -p 5672:5672 -p 15672:15672 rabbitmq")
 def postgresql():
     try:
         sudo(

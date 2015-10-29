@@ -8,3 +8,4 @@ pytest-bdd
 django-http-proxy
 django-debug-toolbar
 python-social-auth
+celery
