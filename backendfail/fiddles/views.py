@@ -58,7 +58,7 @@ class DynProxyView(FiddleMixin, HttpProxy):
     @property
     def base_url(self):
         """ Overriding parent behaviour to get dynamic proxying """
-        url = self.request.scheme + "://127.0.0.1:" + str(self.get_object().port)
+        url = "http://127.0.0.1:" + str(self.get_object().port)
         return url
 
     def get_full_url(self, url):
