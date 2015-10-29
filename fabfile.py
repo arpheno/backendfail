@@ -68,7 +68,7 @@ def coverage():
     with selenium():
         local(
             r'coverage run --omit="backendfail/ror/**,backendfail/tests/**,backendfail/settings/**,**/skeleton/**"'
-            r' --source backendfail -m py.test -m "not docker" --liveserver 0.0.0.0:8081 -v backendfail/tests')
+            r' --source backendfail -m py.test -m "not docker" -v backendfail/tests')
     kill_celery()
 
 
@@ -84,7 +84,7 @@ def selenium():
         local(r"docker stop selenium")
     except:
         local(
-            r"docker run --net='host' --name selenium -d -p 4444:4444 -v /dev/shm:/dev/shm selenium/standalone-chrome")
+            r"docker run --net='host' --name selenium -d -p 4444:4444 selenium/standalone-chrome")
         time.sleep(3)
         with selenium():
             yield

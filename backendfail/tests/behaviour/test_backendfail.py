@@ -1,4 +1,5 @@
 import pytest
+import time
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse_lazy
 from django.test import Client
@@ -20,7 +21,7 @@ def test_view_page():
 
 
 @given('I have a web browser')
-def browser():
+def browser(live_server):
     return webdriver.Remote(
         command_executor='http://127.0.0.1:4444/wd/hub',
         desired_capabilities=DesiredCapabilities.CHROME)
@@ -28,6 +29,7 @@ def browser():
 
 @when('I open the main page')
 def view_main(browser, live_server):
+    time.sleep(3)
     browser.maximize_window()
     browser.get(base_url)
     return browser
