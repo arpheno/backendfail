@@ -21,6 +21,16 @@ def kill_celery():
     local('killall celery')
 
 
+def rdocker():
+    cmd = ["docker run"]
+    cmd.append(" -it")
+    cmd.append("--rm")
+    cmd.append('--user "$(id -u):$(id -g)"')
+    cmd.append('-v "$PWD":/usr/src/app "')
+    cmd.append("-w /usr/src/app rails ")
+    cmd.append("rails new --skip-bundle webapp")
+    local(' '.join(cmd))
+
 
 def ddocker(project='djangoname0'):
     with lcd("backendfail/media/djangoname0"):
@@ -55,6 +65,8 @@ def selenium():
 
 def rabbitmq():
     local("docker run -d -p 5672:5672 -p 15672:15672 rabbitmq")
+
+
 def postgresql():
     try:
         sudo(
