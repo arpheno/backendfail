@@ -1,5 +1,6 @@
 [![Circle CI](https://circleci.com/gh/arpheno/backendfail.svg?style=svg)](https://circleci.com/gh/arpheno/backendfail)
 [![Coverage Status](https://coveralls.io/repos/arpheno/backendfail/badge.svg?branch=master&service=github)](https://coveralls.io/github/arpheno/backendfail?branch=master)
+[![Documentation Status](https://readthedocs.org/projects/backendfail/badge/?version=latest)](http://backendfail.readthedocs.org/en/latest/?badge=latest)
 
 **backendfail**
 
