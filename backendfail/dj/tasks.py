@@ -27,7 +27,7 @@ def launch_django(hash):
                 local(' '.join(cmd))
                 return port
             except SystemExit as e:
-                ps = local("docker start " + hash + '> /dev/null 2>&1 && docker ps --all | grep ' + hash,
+                ps = local("docker start " + hash + ' > /dev/null 2>&1 && docker ps --all | grep ' + hash,
                            capture=True)
                 portregex = re.compile(r":\d{4,5}")
 

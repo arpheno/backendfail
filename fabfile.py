@@ -8,6 +8,20 @@ def test():
         local('py.test django/test.py')
 
 
+def celery():
+    with lcd('backendfail'):
+        # idk man, fuck it
+        ps = local('ps aux', capture=True)
+        assert '/var/www/bf/env/bin/celery' not in ps, "Please stop the deployment celery worker before you run tests"
+        if 'celery -A settings worker --loglevel=INFO' not in ps:
+            local('celery -A settings worker --loglevel=INFO &')  # this is probably really bad
+
+
+def kill_celery():
+    local('killall celery')
+
+
+
 def ddocker(project='djangoname0'):
     with lcd("backendfail/media/djangoname0"):
         cmd = ["docker run"]
@@ -25,8 +39,10 @@ def test():
 
 
 def coverage():
+    celery()
     local(
         r'coverage run --omit="backendfail/ror/**,backendfail/tests/**,backendfail/settings/**,**/skeleton/**" --source backendfail -m py.test backendfail/tests')
+    kill_celery()
 
 
 def graphite():

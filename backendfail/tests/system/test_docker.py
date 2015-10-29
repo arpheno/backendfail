@@ -21,18 +21,8 @@ def test_django_launch_unit():
     sleep(15)
     try:
         assert local('curl localhost:'+str(obj.port),capture=True).return_code == 0
-        try:
-            obj._stop()
-            obj._delete_files()
-        except:
-            pass
     except:
-        try:
-            obj.cleanup()
-            obj._delete_files()
-        except:
-            pass
-        raise
+        obj.cleanup()
 @pytest.mark.docker
 @pytest.mark.django_db
 def test_django_launch_functional():
