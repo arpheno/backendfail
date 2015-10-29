@@ -1,4 +1,6 @@
 import time
+import urllib2
+
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.core.urlresolvers import reverse_lazy
@@ -65,6 +67,10 @@ class DynProxyView(FiddleMixin, HttpProxy):
         """ There is a redundant slash at the end of the url, so we have to strip it """
         result = super(DynProxyView, self).get_full_url(url)
         return result[:-1]
+
+    def create_request(self, url, body=None, headers={}):
+        request = urllib2.Request(url, body, {})
+        return request
 
 
 class EditFile(LoginRequiredMixin, FiddleMixin, UpdateView):
