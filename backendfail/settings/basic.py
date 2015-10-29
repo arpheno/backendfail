@@ -38,7 +38,7 @@ AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend',
     'social.backends.github.GithubOAuth2',
     'social.backends.google.GoogleOAuth2',
-    'social.backends.google.GoogleOAuth2',
+    'social.backends.facebook.FacebookOAuth2',
 )
 # Application definition
 INSTALLED_APPS = (

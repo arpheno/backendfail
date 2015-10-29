@@ -62,14 +62,14 @@ def copy_secret(root="/var/www/bf"):
         run("echo '" + secret + "' > secret.py")
 
 
-def init_git():
+def init_git(destination='production'):
     sudo("apt-get install git")
     sudo("mkdir backendfail -p")
     sudo("chown -R backendfail /home/backendfail")
     with cd("backendfail"):
         run("git init --bare")
     try:
-        local("git remote add production backendfail@" + env.hosts[0].split("@")[1] + ":backendfail")
+        local("git remote add " + destination + " backendfail@" + env.hosts[0].split("@")[1] + ":backendfail")
     except:
         pass
     with cd("backendfail/hooks"):
@@ -86,7 +86,7 @@ sudo nginx -s reload'"""
         sudo("chown -R backendfail /var/www/bf")
         run(" chmod +x post-receive")
 
-    local("git push production master")
+    local("git push " + destination + " master")
 
 
 def create_users():
@@ -142,9 +142,9 @@ def daemons():
     sudo('nginx -s reload')
 
 
-def deploy():
+def deploy(destination='production'):
     with settings(user="backendfail"):
-        init_git()
+        init_git(destination)
         install_deploy_dependencies()
         postgresql()
         create_virtualenv()
