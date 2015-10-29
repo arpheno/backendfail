@@ -20,12 +20,15 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # SECURITY WARNING: keep the secret key used in production secret!
 try:
-    from secret import SECRET_KEY, SOCIAL_AUTH_GITHUB_KEY, SOCIAL_AUTH_GITHUB_SECRET
+    from secret import SECRET_KEY, SOCIAL_AUTH_GITHUB_KEY, SOCIAL_AUTH_GITHUB_SECRET, SOCIAL_AUTH_FACEBOOK_KEY, \
+        SOCIAL_AUTH_FACEBOOK_SECRET
 except ImportError:
     SECRET_KEY = 'you would like this right?'
     SOCIAL_AUTH_GITHUB_KEY = 'asdasdaasdsdasdasd'
     SOCIAL_AUTH_GITHUB_SECRET = 'asdasdasdasdcab'
-
+    SOCIAL_AUTH_FACBOOK_KEY = 'asdasdaasdsdasdasd'
+    SOCIAL_AUTH_FACEBOOK_SECRET = 'asdasdasdasdcab'
+SOCIAL_AUTH_FACEBOOK_SCOPE = ['email']
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 # SECURITY WARNING: don't run with debug turned on in production!
 
@@ -34,6 +37,7 @@ ALLOWED_HOSTS = []
 AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend',
     'social.backends.github.GithubOAuth2',
+    'social.backends.google.GoogleOAuth2',
     'social.backends.google.GoogleOAuth2',
 )
 # Application definition
