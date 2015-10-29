@@ -1,5 +1,6 @@
 import json
 import os
+import re
 from random import randint
 from fabric.context_managers import lcd
 from fabric.operations import local
@@ -49,10 +50,10 @@ class DjangoFiddle(Fiddle):
                     self.save()
                     break
                 except SystemExit as e:
-                    if self.hash in local("docker ps --all", capture=True):
-                        local("docker start " + self.hash)
-                        container = json.loads(local("docker inspect " + self.hash, capture=True))[0]
-                        port = container["NetworkSettings"]["Ports"]["8000/tcp"][0]["HostPort"]
-                        self.port = port
-                        self.save()
-                        break
+                    ps = local("docker start " + self.hash + ' && docker ps --all | grep ' + self.hash, capture=True)
+                    portregex = re.compile(r":\d{4,5}")
+
+                    port = re.search(r".*?:(\d{4,5})", ps).group(1)
+                    self.port = port
+                    self.save()
+                    break
