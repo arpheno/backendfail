@@ -45,12 +45,14 @@ class DjangoFiddle(Fiddle):
                     cmd.append('-p ' + str(port) + ':8000')
                     cmd.append('-d django')
                     cmd.append('bash -c "' + command + '"')
-                    local(' '.join(cmd), capture=True)
+                    cmd.append('> /dev/null 2>&1')
+                    local(' '.join(cmd))
                     self.port = port
                     self.save()
                     break
                 except SystemExit as e:
-                    ps = local("docker start " + self.hash + ' && docker ps --all | grep ' + self.hash, capture=True)
+                    ps = local("docker start " + self.hash + '> /dev/null 2>&1 && docker ps --all | grep ' + self.hash,
+                               capture=True)
                     portregex = re.compile(r":\d{4,5}")
 
                     port = re.search(r".*?:(\d{4,5})", ps).group(1)
