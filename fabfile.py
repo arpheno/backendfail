@@ -147,6 +147,7 @@ def deploy(destination='production'):
         init_git(destination)
         install_deploy_dependencies()
         postgresql()
+        rabbitmq()
         create_virtualenv()
         install_requirements()
         symlink_config()
