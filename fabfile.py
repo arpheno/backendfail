@@ -1,5 +1,4 @@
 from contextlib import contextmanager
-
 import time
 from fabric.context_managers import lcd, cd, prefix
 from fabric.operations import local, sudo, run
@@ -31,6 +30,8 @@ def suppress(*exceptions):
         yield
     except exceptions:
         pass
+
+
 @contextmanager
 def runserver():
     local(
@@ -68,17 +69,15 @@ def test():
 
 
 def totalcoverage():
-    celery()
-    local(
-        r'coverage run --omit="backendfail/ror/**,backendfail/tests/**,backendfail/settings/**,**/skeleton/**" --source backendfail -m py.test backendfail/tests')
-    kill_celery()
+    with celery(), runserver(), selenium():
+        local(
+            r'coverage run --omit="backendfail/ror/**,backendfail/tests/**,backendfail/settings/**,**/skeleton/**" --source backendfail -m py.test -v backendfail/tests')
 
 
 def coverage():
-    with celery(), runserver(), selenium():
-        local(
-            r'coverage run --omit="backendfail/ror/**,backendfail/tests/**,backendfail/settings/**,**/skeleton/**"'
-            r' --source backendfail -m py.test -m "not docker" -v backendfail/tests')
+    local(
+        r'coverage run --omit="backendfail/ror/**,backendfail/tests/**,backendfail/settings/**,**/skeleton/**"'
+        r' --source backendfail -m py.test -m "not docker" -v backendfail/tests')
 
 
 def graphite():

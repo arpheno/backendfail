@@ -16,6 +16,7 @@ from fiddles.models import Fiddle
 base_url = "http://localhost:8081"
 
 
+@pytest.mark.docker
 @scenario('backendfail.feature', 'Viewing the main page')
 def test_view_page():
     pass
@@ -31,7 +32,6 @@ def browser():
 @when('I open the main page')
 def view_main(browser):
     assert "backend.fail" in local("curl http://localhost:8081/", capture=True)
-    time.sleep(3)
     browser.maximize_window()
     browser.get(base_url)
     return browser
