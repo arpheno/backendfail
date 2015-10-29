@@ -48,10 +48,15 @@ def test():
     return local(r'py.test -n 4 tests')
 
 
-def coverage():
+def totalcoverage():
     celery()
     local(
         r'coverage run --omit="backendfail/ror/**,backendfail/tests/**,backendfail/settings/**,**/skeleton/**" --source backendfail -m py.test backendfail/tests')
+    kill_celery()
+def coverage():
+    celery()
+    local(
+        r'coverage run --omit="backendfail/ror/**,backendfail/tests/**,backendfail/settings/**,**/skeleton/**" --source backendfail -m py.test -m "not rails" backendfail/tests')
     kill_celery()
 
 

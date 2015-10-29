@@ -9,6 +9,7 @@ from ror.factories import RailsFiddleFactory
 from ror.models import RailsFiddle
 
 
+@pytest.mark.rails
 @pytest.mark.docker
 @pytest.mark.django_db
 def test_django_launch_unit():
