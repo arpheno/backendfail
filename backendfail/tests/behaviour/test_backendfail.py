@@ -3,6 +3,7 @@ import time
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse_lazy
 from django.test import Client
+from fabric.operations import local
 from pytest_bdd import scenario, given, when, then
 from pytest_bdd.parsers import re
 from selenium import webdriver
@@ -29,6 +30,7 @@ def browser():
 
 @when('I open the main page')
 def view_main(browser):
+    assert "backend.fail" in local("curl http://localhost:8081/", capture=True)
     time.sleep(3)
     browser.maximize_window()
     browser.get(base_url)
