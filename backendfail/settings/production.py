@@ -37,11 +37,11 @@ CACHE_MIDDLEWARE_ALIAS="default"
 CACHE_MIDDLEWARE_SECONDS=30
 CACHE_MIDDLEWARE_KEY_PREFIX=""
 
-# SESSION_COOKIE_SECURE = True
-# CSRF_COOKIE_SECURE = True
-# os.environ['wsgi.url_scheme'] = 'https'
-# os.environ['HTTPS'] = "on"
-# SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
+os.environ['wsgi.url_scheme'] = 'https'
+os.environ['HTTPS'] = "on"
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 COMPRESS_ENABLED=True
 COMPRESS_JS_FILTERS=["compressor.filters.closure.ClosureCompilerFilter"]
 COMPRESS_CLOSURE_COMPILER_BINARY="/usr/bin/closure-compiler"
