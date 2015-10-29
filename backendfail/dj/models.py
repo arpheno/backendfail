@@ -34,5 +34,5 @@ class DjangoFiddle(Fiddle):
         return result
 
     def _launch(self):
-        self.port = launch_django(self.hash).get()
+        self.port = launch_django(self.hash).delay().get()
         self.save()
