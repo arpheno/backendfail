@@ -15,11 +15,10 @@ def test():
 def celery():
     ps = local('ps aux', capture=True)
     assert '/var/www/bf/env/bin/celery' not in ps, "Please stop the deployment celery worker before you run tests"
-    with lcd('backendfail'):
-        # idk man, fuck it
-        local('celery -A settings worker --loglevel=INFO &')  # this is probably really bad
-        yield
-        local('killall celery')  # this is probably really bad
+    # idk man, fuck it
+    local('cd backendfail && celery -A settings worker --loglevel=INFO &')  # this is probably really bad
+    yield
+    local('killall celery')  # this is probably really bad
 
 
 def kill_celery():
@@ -27,10 +26,17 @@ def kill_celery():
 
 
 @contextmanager
-def runserver():
-    with lcd('backendfail'):
-        local('python manage.py migrate && python manage.py runserver 0.0.0.0:8081 &')  # this is probably really bad
+def suppress(*exceptions):
+    try:
         yield
+    except exceptions:
+        pass
+@contextmanager
+def runserver():
+    local(
+        'cd backendfail && python manage.py migrate && python manage.py runserver 0.0.0.0:8081 &')  # this is probably really bad
+    yield
+    with suppress(SystemError):
         local('killall python')
 
 

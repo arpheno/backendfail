@@ -21,14 +21,14 @@ def test_view_page():
 
 
 @given('I have a web browser')
-def browser(live_server):
+def browser():
     return webdriver.Remote(
         command_executor='http://127.0.0.1:4444/wd/hub',
         desired_capabilities=DesiredCapabilities.CHROME)
 
 
 @when('I open the main page')
-def view_main(browser, live_server):
+def view_main(browser):
     time.sleep(3)
     browser.maximize_window()
     browser.get(base_url)
