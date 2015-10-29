@@ -1,3 +1,6 @@
+from contextlib import contextmanager
+
+import time
 from fabric.context_managers import lcd, cd, prefix
 from fabric.operations import local, sudo, run
 from fabric.api import *
@@ -20,6 +23,13 @@ def celery():
 def kill_celery():
     local('killall celery')
 
+
+@contextmanager
+def runserver():
+    with lcd('backendfail'):
+        local('python manage.py runserver 0.0.0.0:8000 &')  # this is probably really bad
+        yield
+        local('killall python')
 
 def rdocker():
     cmd = ["docker run"]
@@ -55,8 +65,10 @@ def totalcoverage():
     kill_celery()
 def coverage():
     celery()
-    local(
-        r'coverage run --omit="backendfail/ror/**,backendfail/tests/**,backendfail/settings/**,**/skeleton/**" --source backendfail -m py.test -m "not rails" -v backendfail/tests')
+    with selenium():
+        local(
+            r'coverage run --omit="backendfail/ror/**,backendfail/tests/**,backendfail/settings/**,**/skeleton/**"'
+            r' --source backendfail -m py.test -m "not docker" --liveserver 0.0.0.0:8081 -v backendfail/tests')
     kill_celery()
 
 
@@ -64,8 +76,18 @@ def graphite():
     local(r"docker run --name graphite -p 8005:80 -p 2003:2003 -p 8125:8125/udp -d hopsoft/graphite-statsd")
 
 
+@contextmanager
 def selenium():
-    local(r"docker run --name selenium -d -p 4444:4444 -v /dev/shm:/dev/shm selenium/standalone-chrome")
+    try:
+        local(r"docker start selenium")
+        yield
+        local(r"docker stop selenium")
+    except:
+        local(
+            r"docker run --net='host' --name selenium -d -p 4444:4444 -v /dev/shm:/dev/shm selenium/standalone-chrome")
+        time.sleep(3)
+        with selenium():
+            yield
 
 
 def rabbitmq():
