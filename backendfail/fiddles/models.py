@@ -22,7 +22,7 @@ def create_file(path, content):
         dirpath = os.path.join(BASE_DIR, os.path.join(os.path.split(path)[0]))
         os.makedirs(dirpath)
     except OSError as e:
-        print e
+        pass
     with open(os.path.join(BASE_DIR, path), 'w') as file:
         file.write(content)
 

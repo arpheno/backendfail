@@ -41,20 +41,17 @@ def test_django_launch_functional():
     obj.save()
     c = Client()
     response = c.get(reverse_lazy('result',kwargs={"pk":obj.id,"url":""}))
-    obj=DjangoFiddle.objects.get(pk=obj.id)
-    try:# pragma: no cover
-        assert response.status_code==200
-        try:
-            obj._stop()
-            obj._remove()
-            obj._delete_files()
-        except:# pragma: no cover
-            pass
-    except: # pragma: no cover
-        try:
-            obj._stop()
-            obj._remove()
-            obj._delete_files()
-        except:# pragma: no cover
-            pass
-        raise
+    assert response.status_code == 200
+
+
+@pytest.mark.docker
+@pytest.mark.django_db
+def test_django_launch_twice():
+    assert DjangoFiddle.objects.count() == 0
+    obj = DjangoFiddleFactory.create()
+    obj.save()
+    c = Client()
+    response = c.get(reverse_lazy('result', kwargs={"pk": obj.id, "url": ""}))
+    assert response.status_code == 200
+    response = c.get(reverse_lazy('result', kwargs={"pk": obj.id, "url": ""}))
+    assert response.status_code == 200
