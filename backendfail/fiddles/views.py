@@ -1,6 +1,5 @@
 import time
 import urllib2
-
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.core.urlresolvers import reverse_lazy
@@ -11,6 +10,7 @@ from httpproxy.views import HttpProxy
 from fiddles.models import Fiddle, FiddleFile
 from fiddles import models
 from dj import models as djmodels
+from ror import models as rormodels
 
 
 class FiddleMixin(object):
@@ -69,6 +69,12 @@ class DynProxyView(FiddleMixin, HttpProxy):
         return result[:-1]
 
     def create_request(self, url, body=None, headers={}):
+        """ This method needs to be overridden to strip the
+        headers from the original request. Otherwise in a
+        production environment, the SSL headers confuse the
+        embedded webservers, which do not understand SSL.
+        :return: The request with stripped headers
+        """
         request = urllib2.Request(url, body, {})
         return request
 
@@ -78,36 +84,45 @@ class EditFile(LoginRequiredMixin, FiddleMixin, UpdateView):
     fields = ["content"]
     template_name = "fiddles/fiddlefile_edit.html"
 
+    def dispatch(self, request, *args, **kwargs):
+        self.fiddle = self.get_fiddle()
+        return super(EditFile, self).dispatch(request, *args, **kwargs)
+
+    def get_fiddle(self):
+        return Fiddle.objects.get_subclass(pk=self.kwargs['pk'])
+
     def get_context_data(self, **kwargs):
         context = super(EditFile, self).get_context_data(**kwargs)
         context['file_content'] = self.get_object().content
         return context
+
     def post(self, request, *args, **kwargs):
         if not self.request.user == self.get_object().fiddle.owner:
             raise PermissionDenied
-        return super(EditFile, self).post(request,*args,**kwargs)
+        return super(EditFile, self).post(request, *args, **kwargs)
+
     def get(self, request, *args, **kwargs):
-        if not self.request.user == self.get_object().fiddle.owner:
+        if not self.request.user == self.fiddle.owner:
             # if it doesn't belong to the user we create a new fiddle.
-            result = self.copy_fiddle(self.get_object())
+            result = self.copy_fiddle()
             return redirect(reverse_lazy('file-edit',
                                          kwargs={"pk": result.id, "path": self.kwargs['path']}))
         return super(EditFile, self).get(request, *args, **kwargs)
 
     def get_object(self, queryset=None):
-        return Fiddle.objects.get(pk=self.kwargs['pk']).fiddlefile_set.get(path=self.kwargs['path'])
+        return self.fiddle.fiddlefile_set.get(path=self.kwargs['path'])
 
-    def copy_fiddle(self, obj):
-        obj=obj.fiddle
-        obj.id = None
-        obj.owner = self.request.user
-        obj.save()
-        print obj.id
-        for file in self.get_object().fiddle.fiddlefile_set.all():
+    def copy_fiddle(self):
+        self.fiddle.id = None
+        self.fiddle.pk = None
+        self.fiddle.owner = self.request.user
+        self.fiddle.save()
+        for file in self.get_fiddle().fiddlefile_set.all():
             file.id = None
-            file.fiddle = obj
+            file.pk = None
+            file.fiddle = self.fiddle
             file.save()
-        return obj
+        return self.fiddle
 
 
 class ViewFile(FiddleMixin, DetailView):
@@ -146,6 +161,9 @@ class CreateFiddle(LoginRequiredMixin, View):
             return getattr(djmodels, self.kwargs["class"])
 
     def get_success_url(self):
-        return reverse_lazy("file-edit",
-                            kwargs={"pk": self.object.id,
-                                    "path":self.object.entrypoint})
+        return reverse_lazy(
+            "file-edit",
+            kwargs={
+                "pk": self.object.id,
+                "path": self.object.entrypoint
+            })

@@ -1,3 +1,5 @@
+from contextlib import contextmanager
+import time
 from fabric.context_managers import lcd, cd, prefix
 from fabric.operations import local, sudo, run
 from fabric.api import *
@@ -8,18 +10,47 @@ def test():
         local('py.test django/test.py')
 
 
+@contextmanager
 def celery():
-    with lcd('backendfail'):
-        # idk man, fuck it
-        ps = local('ps aux', capture=True)
-        assert '/var/www/bf/env/bin/celery' not in ps, "Please stop the deployment celery worker before you run tests"
-        if 'celery -A settings worker --loglevel=INFO' not in ps:
-            local('celery -A settings worker --loglevel=INFO &')  # this is probably really bad
+    ps = local('ps aux', capture=True)
+    assert '/var/www/bf/env/bin/celery' not in ps, "Please stop the deployment celery worker before you run tests"
+    # idk man, fuck it
+    local('cd backendfail && celery -A settings worker --loglevel=INFO &')  # this is probably really bad
+    yield
+    local('killall celery')  # this is probably really bad
 
 
 def kill_celery():
     local('killall celery')
 
+
+@contextmanager
+def suppress(*exceptions):
+    try:
+        yield
+    except exceptions:
+        pass
+
+
+@contextmanager
+def runserver():
+    local(
+        'cd backendfail && python manage.py migrate && python manage.py runserver 0.0.0.0:9000 > /dev/null 2>&1 &')  # this is probably really bad
+    time.sleep(5)
+    yield
+    with suppress(SystemError):
+        local('killall python')
+
+
+def rdocker():
+    cmd = ["docker run"]
+    cmd.append(" -it")
+    cmd.append("--rm")
+    cmd.append('--user "$(id -u):$(id -g)"')
+    cmd.append('-v "$PWD":/usr/src/app "')
+    cmd.append("-w /usr/src/app rails ")
+    cmd.append("rails new --skip-bundle webapp")
+    local(' '.join(cmd))
 
 
 def ddocker(project='djangoname0'):
@@ -38,23 +69,41 @@ def test():
     return local(r'py.test -n 4 tests')
 
 
+def totalcoverage():
+    with celery(), runserver(), selenium():
+        local(
+            r'coverage run --omit="backendfail/ror/**,backendfail/tests/**,backendfail/settings/**,**/skeleton/**" --source backendfail -m py.test -x -v backendfail/tests')
+
+
 def coverage():
-    celery()
-    local(
-        r'coverage run --omit="backendfail/ror/**,backendfail/tests/**,backendfail/settings/**,**/skeleton/**" --source backendfail -m py.test backendfail/tests')
-    kill_celery()
+    with celery(), runserver():
+        local(
+            r'coverage run --omit="backendfail/tests/**,backendfail/settings/**,**/skeleton/**"'
+            r' --source backendfail -m py.test -v backendfail/tests')
 
 
 def graphite():
     local(r"docker run --name graphite -p 8005:80 -p 2003:2003 -p 8125:8125/udp -d hopsoft/graphite-statsd")
 
 
+@contextmanager
 def selenium():
-    local(r"docker run --name selenium -d -p 4444:4444 -v /dev/shm:/dev/shm selenium/standalone-chrome")
+    try:
+        local(r"docker start selenium")
+        yield
+        local(r"docker stop selenium")
+    except:
+        local(
+            r"docker run --net='host' --name selenium -d -p 4444:4444 selenium/standalone-chrome")
+        time.sleep(3)
+        with selenium():
+            yield
 
 
 def rabbitmq():
     local("docker run -d -p 5672:5672 -p 15672:15672 rabbitmq")
+
+
 def postgresql():
     try:
         sudo(
