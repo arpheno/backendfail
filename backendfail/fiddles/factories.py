@@ -20,16 +20,4 @@ class FiddleFileFactory(factory.DjangoModelFactory):
     content = ""
     path="your mom"
 
-class FiddleFactory(factory.Factory):
-    class Meta:
-        model = Fiddle
-    owner = factory.SubFactory(UserFactory)
-    @factory.post_generation
-    def files(self,create,extracted,**kwargs):
-        if not create:
-            # Simple build, do nothing.
-            return
-        self.save()
-        obj = FiddleFileFactory(path="app/templates/app",fiddle=self)
-        obj.save()
 

@@ -14,7 +14,6 @@ def test():
 def celery():
     ps = local('ps aux', capture=True)
     assert '/var/www/bf/env/bin/celery' not in ps, "Please stop the deployment celery worker before you run tests"
-    # idk man, fuck it
     local('cd backendfail && celery -A settings worker --loglevel=INFO &')  # this is probably really bad
     yield
     local('killall celery')  # this is probably really bad

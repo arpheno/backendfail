@@ -24,3 +24,14 @@ def test_django_launch_unit():
         assert local('curl localhost:' + str(obj.port), capture=True).return_code == 0
     except:
         obj.cleanup()
+
+
+@pytest.mark.docker
+@pytest.mark.django_db
+def test_rails_launch_functional():
+    assert RailsFiddle.objects.count() == 0
+    obj = RailsFiddleFactory.create()
+    obj.save()
+    c = Client()
+    response = c.get(reverse_lazy('result', kwargs={"pk": obj.id, "url": ""}))
+    assert response.status_code == 200
