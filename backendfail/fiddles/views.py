@@ -6,6 +6,7 @@ from django.core.urlresolvers import reverse_lazy
 from django.shortcuts import render, redirect
 # Create your views here.
 from django.views.generic import View, DetailView, UpdateView, ListView, CreateView, TemplateView
+from fabric.operations import local
 from httpproxy.views import HttpProxy
 from fiddles.models import Fiddle, FiddleFile
 from fiddles import models
@@ -45,6 +46,7 @@ class DynProxyView(FiddleMixin, HttpProxy):
                 result = super(DynProxyView, self).dispatch(request, url, *args, **kwargs)
                 break
             except:
+                print self.base_url
                 time.sleep(1)
         self.get_object().cleanup()
         return result
@@ -60,7 +62,10 @@ class DynProxyView(FiddleMixin, HttpProxy):
     @property
     def base_url(self):
         """ Overriding parent behaviour to get dynamic proxying """
-        url = "http://127.0.0.1:" + str(self.get_object().port)
+        ip = local("netstat -nr | grep '^0\.0\.0\.0' | awk '{print $2}'", capture=True)
+        if "10.0" in ip:
+            ip = "localhost"
+        url = "http://" + ip + ":" + str(self.get_object().port)
         return url
 
     def get_full_url(self, url):

@@ -20,11 +20,11 @@ def create_file(path, content):
     import os
     print path
     try:
-        dirpath = os.path.join(BASE_DIR, os.path.join(os.path.split(path)[0]))
+        dirpath = os.path.join(os.path.join(os.path.split(path)[0]))
         os.makedirs(dirpath)
     except OSError as e:
         pass
-    with open(os.path.join(BASE_DIR, path), 'w') as file:
+    with open(path, 'w') as file:
         file.write(content)
 
 
@@ -71,7 +71,10 @@ class Fiddle(models.Model):
 
     def _launch(self):
         """ Launches the docker container asynchronously via celery"""
-        self.port = launch_container(self.hash, self.docker_image, self.internal_port, self.startup_command)
+        self.port = launch_container(
+            self.hash, self.docker_image,
+            self.internal_port, self.startup_command,
+            self.fiddlefile_set.all())
         self.save()
 
     def spawn(self):
@@ -90,19 +93,17 @@ class Fiddle(models.Model):
         # self._delete_files()
 
     def _stop(self):
-        with lcd(os.path.join(BASE_DIR, 'containers')):
-            local('docker stop -t 1 ' + self.hash)
+        local('docker stop -t 1 ' + self.hash)
 
     def _remove(self):
-        with lcd(os.path.join(BASE_DIR, 'containers')):
-            local('docker rm ' + self.hash)
+        local('docker rm ' + self.hash)
 
     def _delete_files(self):
-        with lcd(os.path.join(BASE_DIR, 'containers')):
+        with lcd('~/containers'):
             local("rm -rf " + self.hash)
 
     def _write_files(self):
-        root = os.path.join(BASE_DIR, "containers", self.hash)
+        root = os.path.expanduser(os.path.join("~/containers", self.hash))
         for fiddlefile in self.fiddlefile_set.all():
             create_file(os.path.join(root, fiddlefile.path), fiddlefile.content)
 

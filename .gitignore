@@ -1,5 +1,13 @@
 /.coverage/
 /.cache
+/docs/_build
+/docs/_templates
+/docs/_static
+/containers
+/media
+/static
+/.idea
+/backendfail/serve
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

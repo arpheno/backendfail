@@ -1,0 +1,25 @@
+db:
+  image: postgres
+webapp:
+  build: .
+  volumes:
+   - /usr/bin/docker:/bin/docker
+   - /var/run/docker.sock:/var/run/docker.sock
+   - ~/static:/usr/src/app/serve/static/
+   - ~/media:/usr/src/app/media/
+   - ./backendfail:/usr/src/app/
+   - ~/containers:/usr/src/app/containers/
+  ports:
+    - "8000:8000"
+  links:
+    - db
+server:
+  build: ./etc/nginx
+  ports:
+    - "80:80"
+    - "443:443"
+  links:
+    - webapp
+  volumes:
+   - ~/static:/mnt/static/
+   - ~/media:/mnt/media/

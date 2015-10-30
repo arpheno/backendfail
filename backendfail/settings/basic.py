@@ -22,14 +22,15 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # SECURITY WARNING: keep the secret key used in production secret!
 try:
-    from secret import SECRET_KEY, SOCIAL_AUTH_GITHUB_KEY, SOCIAL_AUTH_GITHUB_SECRET, SOCIAL_AUTH_FACEBOOK_KEY, \
-        SOCIAL_AUTH_FACEBOOK_SECRET
+    from secret import SECRET_KEY, SOCIAL_AUTH_GITHUB_KEY, SOCIAL_AUTH_GITHUB_SECRET
 except ImportError:
-    SECRET_KEY = 'you would like this right?'
+    SECRET_KEY = "ThisIsATestSecretKey"
     SOCIAL_AUTH_GITHUB_KEY = 'asdasdaasdsdasdasd'
     SOCIAL_AUTH_GITHUB_SECRET = 'asdasdasdasdcab'
-    SOCIAL_AUTH_FACBOOK_KEY = 'asdasdaasdsdasdasd'
-    SOCIAL_AUTH_FACEBOOK_SECRET = 'asdasdasdasdcab'
+# For local production testing,
+# facebook oauth will only redirect to https://localhost/complete/facebook/
+SOCIAL_AUTH_FACEBOOK_KEY = "1515264362125489"
+SOCIAL_AUTH_FACEBOOK_SECRET = "b4119ae878f7834fad379cc4469139a3"
 SOCIAL_AUTH_FACEBOOK_SCOPE = ['email']
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 # SECURITY WARNING: don't run with debug turned on in production!

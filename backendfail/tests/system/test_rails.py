@@ -12,7 +12,7 @@ from ror.models import RailsFiddle
 @pytest.mark.rails
 @pytest.mark.docker
 @pytest.mark.django_db
-def test_django_launch_unit():
+def test_launch_rails_unit():
     assert RailsFiddle.objects.count() == 0
     obj = RailsFiddleFactory.create()
     obj.save()
@@ -22,6 +22,7 @@ def test_django_launch_unit():
     sleep(15)
     try:
         assert local('curl localhost:' + str(obj.port), capture=True).return_code == 0
+        obj.cleanup()
     except:
         obj.cleanup()
 

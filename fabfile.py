@@ -19,10 +19,6 @@ def celery():
     local('killall celery')  # this is probably really bad
 
 
-def kill_celery():
-    local('killall celery')
-
-
 @contextmanager
 def suppress(*exceptions):
     try:
@@ -68,10 +64,9 @@ def test():
     return local(r'py.test -n 4 tests')
 
 
-def totalcoverage():
-    with celery(), runserver(), selenium():
-        local(
-            r'coverage run --omit="backendfail/ror/**,backendfail/tests/**,backendfail/settings/**,**/skeleton/**" --source backendfail -m py.test -x -v backendfail/tests')
+def localcoverage():
+    with  rabbitmq(), selenium():
+        coverage()
 
 
 def coverage():
@@ -89,6 +84,7 @@ def graphite():
 def selenium():
     try:
         local(r"docker start selenium")
+        time.sleep(3)
         yield
         local(r"docker stop selenium")
     except:
@@ -99,8 +95,17 @@ def selenium():
             yield
 
 
+@contextmanager
 def rabbitmq():
-    local("docker run -d -p 5672:5672 -p 15672:15672 rabbitmq")
+    try:
+        local(r"docker start rabbitmq")
+        yield
+        local(r"docker stop rabbitmq")
+    except:
+        local("docker run -d --name rabbitmq -p 5672:5672 -p 15672:15672 rabbitmq", capture=True)
+        time.sleep(10)
+        with rabbitmq():
+            yield
 
 
 def postgresql():
