@@ -11,7 +11,7 @@ class DjangoFiddle(Fiddle):
 
     @property
     def startup_command(self):
-        return r"python manage.py makemigrations && python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
+        return r"bash -c 'python manage.py makemigrations && python manage.py migrate && python manage.py runserver 0.0.0.0:8000'"
 
     @property
     def docker_image(self):

@@ -23,7 +23,7 @@ def launch_container(hash, image, internal_port, startup_command):
                 cmd.append('-p ' + str(exposed_port) + ':' + internal_port + '')
                 cmd.append('-d')
                 cmd.append(image)
-                cmd.append('bash -c "' + command + '"')
+                cmd.append(command)
                 cmd.append('> /dev/null 2>&1')
                 local(' '.join(cmd))
                 return exposed_port

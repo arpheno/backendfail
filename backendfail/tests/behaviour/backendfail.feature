@@ -9,7 +9,7 @@ Feature: backendfail
   Scenario: Redirection to facebook
     Given I have a web browser
     When I try to login via facebook
-    Then I should be redirected to facebook
+    Then I should be redirected to facebook.com
 
   Scenario: Redirection to backendfail
     Given I have a web browser
