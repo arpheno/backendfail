@@ -35,7 +35,7 @@ def suppress(*exceptions):
 @contextmanager
 def runserver():
     local(
-        'cd backendfail && python manage.py migrate && python manage.py runserver 0.0.0.0:8081 &')  # this is probably really bad
+        'cd backendfail && python manage.py migrate && python manage.py runserver 0.0.0.0:9000 &')  # this is probably really bad
     yield
     with suppress(SystemError):
         local('killall python')
@@ -71,7 +71,7 @@ def test():
 def totalcoverage():
     with celery(), runserver(), selenium():
         local(
-            r'coverage run --omit="backendfail/ror/**,backendfail/tests/**,backendfail/settings/**,**/skeleton/**" --source backendfail -m py.test -v backendfail/tests')
+            r'coverage run --omit="backendfail/ror/**,backendfail/tests/**,backendfail/settings/**,**/skeleton/**" --source backendfail -m py.test -x -v backendfail/tests')
 
 
 def coverage():
