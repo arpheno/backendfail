@@ -28,6 +28,7 @@ def launch_container(hash, image, internal_port, startup_command):
                 local(' '.join(cmd))
                 return exposed_port
             except SystemExit as e:
+                print e
                 ps = local("docker start " + hash + ' > /dev/null 2>&1 && docker ps --all | grep ' + hash,
                            capture=True)
                 exposed_port = re.search(r".*?:(\d{4,5})", ps).group(1)

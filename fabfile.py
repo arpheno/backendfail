@@ -77,7 +77,7 @@ def totalcoverage():
 def coverage():
     local(
         r'coverage run --omit="backendfail/ror/**,backendfail/tests/**,backendfail/settings/**,**/skeleton/**"'
-        r' --source backendfail -m py.test -m "not docker" -v backendfail/tests')
+        r' --source backendfail -m py.test -v backendfail/tests')
 
 
 def graphite():
