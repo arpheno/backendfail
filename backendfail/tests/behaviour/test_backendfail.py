@@ -41,7 +41,12 @@ def test_login_facebook_redirect_back():
 
 @given('I have a web browser')
 def browser():
-    return webdriver.Chrome()
+    try:
+        return webdriver.Remote(
+            command_executor='http://127.0.0.1:4444/wd/hub',
+            desired_capabilities=DesiredCapabilities.CHROME)
+    except:
+        return webdriver.Chrome()
 
 
 @when('I open the main page')

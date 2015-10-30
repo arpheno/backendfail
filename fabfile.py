@@ -75,9 +75,10 @@ def totalcoverage():
 
 
 def coverage():
-    local(
-        r'coverage run --omit="backendfail/ror/**,backendfail/tests/**,backendfail/settings/**,**/skeleton/**"'
-        r' --source backendfail -m py.test -v backendfail/tests')
+    with celery(), runserver():
+        local(
+            r'coverage run --omit="backendfail/tests/**,backendfail/settings/**,**/skeleton/**"'
+            r' --source backendfail -m py.test -v backendfail/tests')
 
 
 def graphite():
