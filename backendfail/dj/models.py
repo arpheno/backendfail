@@ -15,7 +15,7 @@ class DjangoFiddle(Fiddle):
 
     @property
     def docker_image(self):
-        return "arpheno/rails-skeleton"
+        return "django"
 
     @property
     def entrypoint(self):
