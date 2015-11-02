@@ -1,5 +1,7 @@
 import time
 import urllib2
+from contextlib import contextmanager
+
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.core.urlresolvers import reverse_lazy
@@ -8,11 +10,19 @@ from django.shortcuts import render, redirect
 from django.views.generic import View, DetailView, UpdateView, ListView, CreateView, TemplateView
 from fabric.operations import local
 from httpproxy.views import HttpProxy
+
 from fiddles.models import Fiddle, FiddleFile
 from fiddles import models
 from dj import models as djmodels
 from ror import models as rormodels
 
+
+@contextmanager
+def suppress(*exceptions):
+    try:
+        yield
+    except exceptions:
+        pass
 
 class FiddleMixin(object):
     """ Mixin to provide polymorphism via `select_subclasses` """
@@ -160,10 +170,12 @@ class CreateFiddle(LoginRequiredMixin, View):
 
     def get_model(self):
         """ Search for available subclasses of `Fiddle` """
-        try:
+        with suppress(Exception):
             return getattr(models, self.kwargs["class"])
-        except:
+        with suppress(Exception):
             return getattr(djmodels, self.kwargs["class"])
+        with suppress(Exception):
+            return getattr(rormodels, self.kwargs["class"])
 
     def get_success_url(self):
         return reverse_lazy(

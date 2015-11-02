@@ -19,7 +19,7 @@ class RailsFiddle(Fiddle):
 
     @property
     def entrypoint(self):
-        return "README.roc"
+        return "README.rdoc"
 
     @property
     def prefix(self):
