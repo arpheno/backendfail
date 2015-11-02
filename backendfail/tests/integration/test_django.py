@@ -23,12 +23,9 @@ def test_django_write_files():
     obj = DjangoFiddle.objects.get(id=obj.id)
     obj._hash()
     obj._write_files()
-    root = os.path.expanduser(os.path.expanduser(os.path.join("~", "containers", obj.hash)))
-    assert os.path.exists(root)
-    assert os.path.exists(os.path.join(root, 'app'))
-    assert os.path.exists(os.path.join(root, 'app', '__init__.py'))
-    obj._delete_files()
-    assert not os.path.exists(root)
+    assert os.path.exists(obj.root)
+    assert os.path.exists(os.path.join(obj.root, 'app'))
+    assert os.path.exists(os.path.join(obj.root, 'app', '__init__.py'))
 
 
 @pytest.mark.django_db
