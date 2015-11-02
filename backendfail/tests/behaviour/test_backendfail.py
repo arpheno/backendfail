@@ -10,9 +10,6 @@ from selenium import webdriver
 from selenium.webdriver import DesiredCapabilities
 from selenium.webdriver.common.keys import Keys
 
-from dj.factories import DjangoFiddleFactory
-from fiddles.factories import FiddleFactory, UserFactory
-from fiddles.models import Fiddle
 
 
 
