@@ -8,7 +8,7 @@ webapp:
    - ~/static:/usr/src/app/serve/static/
    - ~/media:/usr/src/app/media/
    - ./backendfail:/usr/src/app/
-   - ~/containers:/usr/src/app/containers/
+   - /var/containers:/var/containers/
   ports:
     - "8000:8000"
   links:

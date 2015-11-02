@@ -17,6 +17,11 @@ def get_upload_path(instance, filename):
 
 
 def create_file(path, content):
+    """
+    :param path: Absolute filepath
+    :param content: Content of the file
+    :return:
+    """
     import os
     print path
     try:
@@ -98,14 +103,12 @@ class Fiddle(models.Model):
     def _remove(self):
         local('docker rm ' + self.hash)
 
-    def _delete_files(self):
-        with lcd('~/containers'):
-            local("rm -rf " + self.hash)
-
+    @property
+    def root(self):
+        return os.path.join("/var/containers", self.hash)
     def _write_files(self):
-        root = os.path.expanduser(os.path.join("~/containers", self.hash))
         for fiddlefile in self.fiddlefile_set.all():
-            create_file(os.path.join(root, fiddlefile.path), fiddlefile.content)
+            create_file(os.path.join(self.root, fiddlefile.path), fiddlefile.content)
 
     def get_absolute_url(self):
         return reverse_lazy('fiddle-detail', kwargs={"pk": self.id})
