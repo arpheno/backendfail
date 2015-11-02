@@ -6,7 +6,7 @@ deployment:
     branch: production
     owner: arpheno
     commands:
-      - docker build . -t arpheno/backendfail:production
+      - docker build -t arpheno/backendfail:production .
       - docker login -e $DOCKER_EMAIL -u $DOCKER_USER -p $DOCKER_PASS
       - docker push arpheno/backendfail
   master:
@@ -18,7 +18,7 @@ deployment:
   development:
     branch: development
     commands:
-      - docker build . -t arpheno/backendfail:development
+      - docker build -t arpheno/backendfail:development .
       - docker login -e $DOCKER_EMAIL -u $DOCKER_USER -p $DOCKER_PASS
       - docker push arpheno/backendfail
 
