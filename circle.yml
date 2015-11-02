@@ -1,16 +1,24 @@
 machine:
   services:
     - docker
-#deployment:
-#  production:
-#    branch: master
-#    owner: arpheno
-#    commands:
-#  staging:
-#    branch: staging
-#    commands:
-#      - ./deploy_staging.sh
-#  development:
-#    branch: development
-#    commands:
+deployment:
+  production:
+    branch: production
+    owner: arpheno
+    commands:
+      - docker build -t arpheno/backendfail:production .
+      - docker login -e $DOCKER_EMAIL -u $DOCKER_USER -p $DOCKER_PASS
+      - docker push arpheno/backendfail
+  master:
+    branch: master
+    commands:
+      - docker build -t arpheno/backendfail:master .
+      - docker login -e $DOCKER_EMAIL -u $DOCKER_USER -p $DOCKER_PASS
+      - docker push arpheno/backendfail
+  development:
+    branch: development
+    commands:
+      - docker build -t arpheno/backendfail:development .
+      - docker login -e $DOCKER_EMAIL -u $DOCKER_USER -p $DOCKER_PASS
+      - docker push arpheno/backendfail
 
