@@ -6,18 +6,21 @@ deployment:
     branch: production
     owner: arpheno
     commands:
+      - cd backendfail && bower install && cd ..
       - docker build -t arpheno/backendfail:production .
       - docker login -e $DOCKER_EMAIL -u $DOCKER_USER -p $DOCKER_PASS
       - docker push arpheno/backendfail
   master:
     branch: master
     commands:
+      - cd backendfail && bower install && cd ..
       - docker build -t arpheno/backendfail:master .
       - docker login -e $DOCKER_EMAIL -u $DOCKER_USER -p $DOCKER_PASS
       - docker push arpheno/backendfail
   development:
     branch: development
     commands:
+      - cd backendfail && bower install && cd ..
       - docker build -t arpheno/backendfail:development .
       - docker login -e $DOCKER_EMAIL -u $DOCKER_USER -p $DOCKER_PASS
       - docker push arpheno/backendfail
