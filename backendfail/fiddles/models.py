@@ -17,6 +17,11 @@ def get_upload_path(instance, filename):
 
 
 def create_file(path, content):
+    """
+    :param path: Absolute filepath
+    :param content: Content of the file
+    :return:
+    """
     import os
     print path
     try:

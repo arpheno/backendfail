@@ -19,7 +19,7 @@ def launch_container(hash, image, internal_port, startup_command, files):
             try:
                 cmd = ["docker run"]
                 cmd.append('--name ' + hash)
-                cmd.append('-v ~/containers/' + hash + ':/usr/src/app')
+                cmd.append('-v /home/vagrant/containers/' + hash + ':/usr/src/app')
                 cmd.append('-w /usr/src/app')
                 cmd.append('-p ' + str(exposed_port) + ':' + internal_port + '')
                 cmd.append('-d')

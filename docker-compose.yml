@@ -1,5 +1,20 @@
+#monitor:
+#  image: hopsoft/graphite-statsd
+#  net: container:webapp
+#messagequeue:
+#  image: rabbitmq
+#  ports:
+#    - "5672:5672"
+#    - "15672:15672"
+#cache:
+#  image: memcached
+#data:
+#  image: ubuntu:14.04
+#  volumes:
+#    - /var/lib/postgresql/data
 db:
   image: postgres
+#  volumes_from: [data]
 webapp:
   build: .
   volumes:
@@ -8,11 +23,16 @@ webapp:
    - ~/static:/usr/src/app/serve/static/
    - ~/media:/usr/src/app/media/
    - ./backendfail:/usr/src/app/
-   - ~/containers:/usr/src/app/containers/
-  ports:
-    - "8000:8000"
+   - ~/containers:/root/containers/
+#  ports:
+#   - "8005:80"
+#   - "2003:2003"
+#   - "8125:8125/udp"
+#   - "8126:8126"
   links:
     - db
+#    - cache
+#    - messagequeue
 server:
   build: ./etc/nginx
   ports:
@@ -20,6 +40,8 @@ server:
     - "443:443"
   links:
     - webapp
+#    - monitor
   volumes:
+   - ./etc/nginx/nginx.conf:/etc/nginx/conf.d/default.conf
    - ~/static:/mnt/static/
    - ~/media:/mnt/media/
