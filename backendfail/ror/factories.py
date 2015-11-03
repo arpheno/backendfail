@@ -11,9 +11,6 @@ class RailsFiddleFactory(factory.DjangoModelFactory):
 
     @factory.post_generation
     def files(self, create, extracted, **kwargs):
-        if not create:
-            # Simple build, do nothing.
-            return
         self.save()
         obj = FiddleFileFactory(path="README.rdoc", fiddle=self)
         obj.save()
