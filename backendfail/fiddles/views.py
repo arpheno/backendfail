@@ -184,3 +184,39 @@ class CreateFiddle(LoginRequiredMixin, View):
                 "pk": self.object.id,
                 "path": self.object.entrypoint
             })
+
+
+class RenameFile(LoginRequiredMixin, FiddleMixin, UpdateView):
+    model = FiddleFile
+    fields = ["path"]
+    template_name = "fiddles/fiddlefile_edit.html"
+
+    def get(self):
+        return
+
+    def dispatch(self, request, *args, **kwargs):
+        self.fiddle = self.get_fiddle()
+        return super(EditFile, self).dispatch(request, *args, **kwargs)
+
+    def get_fiddle(self):
+        return Fiddle.objects.get_subclass(pk=self.kwargs['pk'])
+
+    def post(self, request, *args, **kwargs):
+        if not self.request.user == self.get_object().fiddle.owner:
+            raise PermissionDenied
+        return super(EditFile, self).post(request, *args, **kwargs)
+
+    def get_object(self, queryset=None):
+        return self.fiddle.fiddlefile_set.get(path=self.kwargs['path'])
+
+    def copy_fiddle(self):
+        self.fiddle.id = None
+        self.fiddle.pk = None
+        self.fiddle.owner = self.request.user
+        self.fiddle.save()
+        for file in self.get_fiddle().fiddlefile_set.all():
+            file.id = None
+            file.pk = None
+            file.fiddle = self.fiddle
+            file.save()
+        return self.fiddle

@@ -11,9 +11,9 @@
     <ul>
         {% for file in object.fiddle.fiddlefile_set.all %}
             {% if user == object.fiddle.owner %}
-                <a href="{% url 'file-edit' pk=object.fiddle.id path=file.path %}">
+                <a class="fileitem" href="{% url 'file-edit' pk=object.fiddle.id path=file.path %}">
             {% else %}
-                <a href="{% url 'file-view' pk=object.fiddle.id path=file.path %}">
+                <a class="fileitem" href="{% url 'file-view' pk=object.fiddle.id path=file.path %}">
             {% endif %}
         <paper-card {% if file == object %}style="background-color: rgba(11, 128, 67, 0.25)"{% endif %}>
             {{ file.path }}
@@ -21,6 +21,17 @@
         </a>
         {% endfor %}
     </ul>
+    <style type="text/css">
+        .offscreen {
+            position: fixed;
+            top: -500px;
+            left: -500px;
+        }
+    </style>
+    <paper-menu id="cont" class="offscreen">
+        <paper-item>Create new Item</paper-item>
+        <paper-item>Rename Item</paper-item>
+    </paper-menu>
 {% endblock %}
 {% block content %}
 
@@ -63,6 +74,31 @@
                 editor.getSession().setMode("ace/mode/html");
             if (window.location.pathname.indexOf(".rb") > -1)
                 editor.getSession().setMode("ace/mode/ruby");
+            var hidecontext = function () {
+                document.getElementById("cont").style.top = "-500px";
+                document.getElementById("cont").style.left = "-500px";
+                document.getElementById("explorer").removeEventListener("click");
+                var files = document.getElementsByClassName("fileitem");
+                for (i = 0; i < files.length; i++) {
+                    files[i].removeEventListener("click");
+                }
+                return false;
+            };
+            document.getElementById("explorer").addEventListener(
+                    "contextmenu",
+                    function (ev) {
+                        ev.preventDefault();
+                        console.log(ev);
+                        document.getElementById("cont").style.top = ev.clientY + "px";
+                        document.getElementById("cont").style.left = ev.clientX + "px";
+                        var files = document.getElementsByClassName("fileitem");
+                        for (i = 0; i < files.length; i++) {
+                            files[i].addEventListener("click", hidecontext, false);
+                        }
+                        document.getElementById("explorer").addEventListener("click", hidecontext, false);
+                    });
         });
+
+
     </script>
 {% endblock %}

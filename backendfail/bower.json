@@ -26,6 +26,7 @@
     "polymer": "~1.2.0",
     "paper-card": "PolymerElements/paper-card#~1.0.7",
     "paper-icon-button": "PolymerElements/paper-icon-button#~1.0.5",
-    "wrapped-iframe": "arpheno/wrapped-iframe"
+    "wrapped-iframe": "arpheno/wrapped-iframe",
+    "paper-menu": "PolymerElements/paper-menu#~1.1.1"
   }
 }
