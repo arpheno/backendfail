@@ -77,13 +77,21 @@
         <h1 style="margin-bottom:40px;font-size: 10vh;color:#fff;font-weight: 700;">Show me the Code</h1>
     <paper-card elevation=5 style="text-align: center;padding:10px;width:100%;background-color: rgba(255, 255, 255, 0.9)">
     <p>This is a place where you can try out backend code for web applications
-        using frameworks like django. <span style="font-weight: 400;">Currently only django is supported.</span></p>
+        using web-frameworks like django or ruby on rails. </p>
     <p>Your app will be run in a live docker container, just like it would be run
         in an actual deployment environment.</p>
         </paper-card>
-        <a href="{% url 'fiddle-create' class="DjangoFiddle" %}" style="padding:30px;">
-            <paper-button raised elevation=5 style="background-color: #14ae7b;color:white">Create new DjangoFiddle
+        <div style="padding:30px;display:flex;flex-wrap:wrap;max-width:200px;">
+
+            <a href="{% url 'fiddle-create' class="DjangoFiddle" %}" style="flex:1 1 100%;padding:3px;">
+                <paper-button raised elevation=5 style="background-color: #14ae7b;color:white;width:100%;"> Try Django
             </paper-button>
         </a>
+            <a href="{% url 'fiddle-create' class="RailsFiddle" %}" style="flex:1 1 100%;padding:3px;">
+                <paper-button raised elevation=5 style="background-color: #B02B2C;color:white;width:100%;">Try Ruby on
+                    Rails
+                </paper-button>
+            </a>
+        </div>
     </div>
 {% endblock %}

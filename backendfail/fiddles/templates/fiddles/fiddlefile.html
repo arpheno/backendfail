@@ -27,7 +27,8 @@
 {% block content %}
 
     <div id="editor"></div>
-    <iframe id="preview" src="{% static 'loading.html' %}"></iframe>
+    <wrapped-iframe load="/{{ object.fiddle.id }}/result/" src="/static/loading.html" id="preview"
+                    baseurl="/{{ object.fiddle.id }}/result/"></wrapped-iframe>
     <script src="//d1n0x3qji82z53.cloudfront.net/src-min-noconflict/ace.js" type="text/javascript"
             charset="utf-8"></script>
     <script type="text/javascript">
@@ -66,7 +67,6 @@
             }
 
 
-            $("iframe").attr('src', '/{{ object.fiddle.id }}/result/');
         });
     </script>
 {% endblock %}

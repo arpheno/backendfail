@@ -6,7 +6,6 @@ from django.db import models
 from fabric.context_managers import lcd
 from fabric.operations import local
 from model_utils.managers import InheritanceManager
-
 # Create your models here.
 from fiddles.tasks import launch_container
 from settings.basic import BASE_DIR
@@ -106,6 +105,7 @@ class Fiddle(models.Model):
     @property
     def root(self):
         return os.path.join("/var/containers", self.hash)
+
     def _write_files(self):
         for fiddlefile in self.fiddlefile_set.all():
             create_file(os.path.join(self.root, fiddlefile.path), fiddlefile.content)
