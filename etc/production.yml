@@ -1,0 +1,42 @@
+messagequeue:
+  image: rabbitmq
+  ports:
+    - "5672:5672"
+    - "15672:15672"
+cache:
+  image: memcached
+data:
+  image: ubuntu:14.04
+  volumes:
+    - /var/lib/postgresql/data
+db:
+  image: postgres
+  volumes_from: [data]
+webapp:
+  image: arpheno/backendfail:master
+  volumes:
+   - /usr/bin/docker:/bin/docker
+   - /var/run/docker.sock:/var/run/docker.sock
+   - /usr/lib/x86_64-linux-gnu/libapparmor.so.1.1.0:/lib/x86_64-linux-gnu/libapparmor.so.1
+   - ~/static:/usr/src/app/serve/static/
+   - ./secret.py:/usr/src/app/settings/secret.py
+   - ~/media:/usr/src/app/media/
+   - /var/containers:/var/containers/
+  links:
+    - db
+    - cache
+    - messagequeue
+server:
+  image: arpheno/nginx
+  ports:
+    - "80:80"
+    - "443:443"
+  links:
+    - webapp
+  volumes:
+   - ~/static:/mnt/static/
+   - ~/media:/mnt/media/
+
+#monitor:
+#  image: hopsoft/graphite-statsd
+#  net: container:webapp

@@ -12,7 +12,7 @@ from settings.basic import BASE_DIR
 
 
 def get_upload_path(instance, filename):
-    return os.path.join(instance.fiddle.name, filename)
+    pass
 
 
 def create_file(path, content):
