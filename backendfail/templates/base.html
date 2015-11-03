@@ -12,6 +12,8 @@
     <link rel="import" href="{% static 'paper-toolbar/paper-toolbar.html' %}">
     <link rel="import" href="{% static 'paper-tabs/paper-tabs.html' %}">
     <link rel="import" href="{% static 'paper-button/paper-button.html' %}">
+    <link rel="import" href="{% static 'paper-spinner/paper-spinner.html' %}">
+    <link rel="import" href="{% static 'wrapped-iframe/wrapped-iframe.html' %}">
     <link rel="import" href="{% static 'paper-icon-button/paper-icon-button.html' %}">
     <link rel="import" href="{% static 'paper-card/paper-card.html' %}">
     <link rel="import" href="{% static 'paper-drawer-panel/paper-drawer-panel.html' %}">
@@ -27,6 +29,7 @@
         [hidden][style="display: block;"] {
             display: block !important;
         }
+
         h1 {
             font-size: 23px;
         }
@@ -62,35 +65,42 @@
             content: '-';
             margin-right: 3px;
         }
-        #preview{
-            margin:5px;
-            border:1px inset;
+
+        #preview {
+            margin: 5px;
+            border: 1px inset;
             position: absolute;
-            right:0;
-            width:50%;
-            width:calc(50% - 10px);
-            top:0;
-            bottom:20px;
-            height:100%;
-            height:calc(100% - 30px);
+            right: 0;
+            width: 50%;
+            width: calc(50% - 10px);
+            top: 0;
+            bottom: 20px;
+            height: 100%;
+            height: calc(100% - 30px);
         }
+
         textarea, #editor {
             position: absolute;
             bottom: 0;
             top: 5px;
             border: none;
             left: 0;
-            width:50%;
+            width: 50%;
         }
+
         #editor * {
             font-family: monospace
         }
-        #drawer{z-index:15;}
+
+        #drawer {
+            z-index: 15;
+        }
     </style>
     <link href='https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900' rel='stylesheet'
           type='text/css'>
 
     <link rel="import" href="{% static 'polymer/polymer.html' %}">
+    <link rel="stylesheet" src="{% static 'backendfail/base.css' %}">
 </head>
 <body>
 <paper-drawer-panel>
