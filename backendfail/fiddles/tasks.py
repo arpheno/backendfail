@@ -8,7 +8,14 @@ from settings.basic import BASE_DIR
 
 
 @shared_task
-def launch_container(hash, image, internal_port, startup_command, files):
+def launch_container(hash, image, internal_port, startup_command):
+    """
+    :param hash: The hash of the Fiddle to start. It will become the name of the container
+    :param image: The image that we should launch
+    :param internal_port: The port that the internal webserver of the framework listens on
+    :param startup_command: The command that should be executed on startup
+    :return: The exposed port
+    """
     internal_port = str(internal_port)
     image = str(image)
     command = str(startup_command)
@@ -20,7 +27,7 @@ def launch_container(hash, image, internal_port, startup_command, files):
             exposed_port = re.search(r".*?:(\d{4,5})", ps).group(1)
             return exposed_port
         except SystemExit as e:
-            print e
+            # We should replace this with docker-py
             cmd = ["docker run"]
             cmd.append('--name ' + hash)
             cmd.append('-v /var/containers/' + hash + ':/usr/src/app')
