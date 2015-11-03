@@ -9,6 +9,23 @@ from fiddles.factories import UserFactory
 from fiddles.models import Fiddle
 
 
+@scenario('fiddlefiles.feature', 'Creating files with login')
+def test_creating_files_with_login():
+    """Creating files with login."""
+
+
+@pytest.mark.django_db
+@scenario('fiddlefiles.feature', 'Renaming files with login')
+def test_renaming_files_with_login():
+    """Creating files with login."""
+
+
+@pytest.mark.django_db
+@scenario('fiddlefiles.feature', 'Deleting files with login')
+def test_deleting_files_with_login():
+    """Creating files with login."""
+
+
 @scenario('fiddlefiles.feature', 'Viewing files without login')
 def test_view_anon():
     pass
@@ -50,8 +67,7 @@ def test_edit_copy():
 
 
 @given(re(r"I'm logged in as (?P<user>.*)"))
-@pytest.mark.django_db
-def myclient(user, client, admin_client):
+def myclient(user, client, admin_client, db):
     if user == "no one":
         return client
     if user == "an admin":
@@ -75,6 +91,19 @@ def obtain(fiddlefile, user):
 @given("I don't own the file")
 def dontown(fiddlefile, user):
     pass
+
+
+@given('I own the fiddle')
+def i_own_the_fiddle(fiddle, user):
+    """I own the fiddle."""
+    fiddle.owner = User.objects.get(username=user)
+    fiddle.save()
+
+
+@given('There is a fiddle')
+def fiddle(db):
+    """There is a fiddle."""
+    return DjangoFiddleFactory()
 
 
 @given("There is no fiddle")
@@ -169,3 +198,62 @@ def redirect_file(myclient):
 def file_edited(fiddlefile):
     fiddlefile.refresh_from_db()
     assert fiddlefile.content == "edited"
+
+
+@when('I try to create a fiddlefile')
+def i_try_to_create_a_fiddlefile(fiddle, myclient):
+    """I try to create a fiddlefile."""
+    myclient.response = myclient.post(
+        reverse_lazy('file-create',
+                     kwargs={
+                         "pk": fiddle.id,
+                     }
+                     ), {"path": "example", "content": ""}
+    )
+
+
+@when('I try to rename the file')
+def i_try_to_rename_the_file(fiddlefile, myclient):
+    """I try to create a fiddlefile."""
+    myclient.response = myclient.post(
+        reverse_lazy('file-rename',
+                     kwargs={
+                         "pk": fiddlefile.fiddle.id,
+                         "path": fiddlefile.path,
+
+                     }
+                     ), {"path": "example"}
+    )
+
+
+@when('I try to delete the file')
+def i_try_to_rename_the_file(fiddlefile, myclient):
+    """I try to create a fiddlefile."""
+    myclient.response = myclient.post(
+        reverse_lazy('file-delete',
+                     kwargs={
+                         "pk": fiddlefile.fiddle.id,
+                         "path": fiddlefile.path,
+                     }
+                     ), {"path": "example"}
+    )
+
+
+@then('The file should be deleted')
+def the_file_should_be_deleted(fiddlefile):
+    """A file should be created."""
+    assert not fiddlefile in fiddlefile.fiddle.fiddlefile_set.all()
+
+
+@then('The file should be renamed')
+def the_file_should_be_renamed(fiddlefile):
+    """A file should be created."""
+    fiddlefile.refresh_from_db()
+    assert fiddlefile.path == "example"
+
+
+@then('A file should be created')
+def a_file_should_be_created(fiddle):
+    """A file should be created."""
+    fiddle.refresh_from_db()
+    assert "example" in [file.path for file in fiddle.fiddlefile_set.all()]

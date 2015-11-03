@@ -23,6 +23,13 @@
             font-size: 23px;
         }
 
+        #explorer {
+            position: absolute;
+            top: 0px;
+            bottom: 0px;
+            height: 100%;;
+        }
+
         h1, p {
             text-align: center;
             padding: 20px;
@@ -68,7 +75,7 @@
             height: calc(100% - 30px);
         }
 
-        textarea, #editor {
+        #editor {
             position: absolute;
             bottom: 0;
             top: 5px;
@@ -115,7 +122,6 @@
         <nav id="explorer">
             {% block nav %}
             {% endblock %}
-
         </nav>
     </paper-header-panel>
     <paper-header-panel main>
