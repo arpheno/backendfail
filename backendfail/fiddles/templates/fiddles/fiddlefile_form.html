@@ -1,0 +1,44 @@
+{% extends 'fiddles/fiddlefile.html' %}
+
+{% block content %}
+    <form action="" method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button> Submit</button>
+    </form>
+
+    <script type="text/javascript">
+        $(function () {
+            var hidecontext = function () {
+                document.getElementById("cont").style.top = "-500px";
+                document.getElementById("explorer").removeEventListener("click");
+                var files = document.getElementsByClassName("fileitem");
+                for (i = 0; i < files.length; i++) {
+                    files[i].removeEventListener("click");
+                }
+                return false;
+            };
+            document.getElementById("explorer").addEventListener(
+                    "contextmenu",
+                    function (ev) {
+                        ev.preventDefault();
+                        console.log(ev)
+                        // Django generating javascript
+                        if (ev.target.innerText) {
+                            var BASE_URL = '{% url "fiddle-detail" pk=object.fiddle.id %}/'
+                            var link = BASE_URL + ev.target.innerText + "/rename";
+                            console.log(link);
+                        }
+                        document.getElementById("fileeditlink").setAttribute("href", link);
+                        document.getElementById("cont").style.top = ev.clientY + "px";
+                        document.getElementById("cont").style.left = ev.clientX + "px";
+                        var files = document.getElementsByClassName("fileitem");
+                        for (i = 0; i < files.length; i++) {
+                            files[i].addEventListener("click", hidecontext, false);
+                        }
+                        document.getElementById("explorer").addEventListener("click", hidecontext, false);
+                    });
+        });
+    </script>
+{% endblock %}
+

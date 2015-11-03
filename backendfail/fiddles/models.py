@@ -22,7 +22,6 @@ def create_file(path, content):
     :return:
     """
     import os
-    print path
     try:
         dirpath = os.path.join(os.path.join(os.path.split(path)[0]))
         os.makedirs(dirpath)

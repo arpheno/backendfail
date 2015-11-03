@@ -11,9 +11,9 @@
     <ul>
         {% for file in object.fiddle.fiddlefile_set.all %}
             {% if user == object.fiddle.owner %}
-                <a href="{% url 'file-edit' pk=object.fiddle.id path=file.path %}">
+                <a class="fileitem" href="{% url 'file-edit' pk=object.fiddle.id path=file.path %}">
             {% else %}
-                <a href="{% url 'file-view' pk=object.fiddle.id path=file.path %}">
+                <a class="fileitem" href="{% url 'file-view' pk=object.fiddle.id path=file.path %}">
             {% endif %}
         <paper-card {% if file == object %}style="background-color: rgba(11, 128, 67, 0.25)"{% endif %}>
             {{ file.path }}
@@ -21,6 +21,37 @@
         </a>
         {% endfor %}
     </ul>
+    <a style="position:absolute; bottom:53px;right:24px;" href="{% url 'file-create' pk=object.fiddle.id %}">
+        <paper-fab icon="add"></paper-fab>
+    </a>
+    <style type="text/css">
+        .offscreen {
+            position: fixed;
+            top: -500px;
+            left: -500px;
+        }
+
+        #cont paper-item {
+            cursor: pointer;
+        }
+
+        #cont a {
+            text-decoration: none;
+            font-weight: 400;
+        }
+
+        #cont paper-item:hover, .cont paper-item:hover {
+            background-color: #00b8d4;
+        }
+    </style>
+    <paper-menu id="cont" class="offscreen">
+        <a href="{% url 'file-create' pk=object.fiddle.id %}">
+            <paper-item>Create new File</paper-item>
+        </a>
+        <a id="fileeditlink" href="">
+            <paper-item>Rename File</paper-item>
+        </a>
+    </paper-menu>
 {% endblock %}
 {% block content %}
 
@@ -63,6 +94,40 @@
                 editor.getSession().setMode("ace/mode/html");
             if (window.location.pathname.indexOf(".rb") > -1)
                 editor.getSession().setMode("ace/mode/ruby");
+            var hidecontext = function () {
+                document.getElementById("cont").style.top = "-500px";
+                document.getElementById("explorer").removeEventListener("click");
+                var files = document.getElementsByClassName("fileitem");
+                for (i = 0; i < files.length; i++) {
+                    files[i].removeEventListener("click");
+                }
+                return false;
+            };
+            document.getElementById("explorer").addEventListener(
+                    "contextmenu",
+                    function (ev) {
+                        ev.preventDefault();
+                        console.log(ev)
+                        // Django generating javascript
+                        if (ev.target.innerText.length < 100) {
+                            var BASE_URL = '{% url "fiddle-detail" pk=object.fiddle.id %}/'
+                            var link = BASE_URL + ev.target.innerText + "/rename";
+                            console.log(link);
+                            document.getElementById("fileeditlink").style.visibility = "visible";
+                            document.getElementById("fileeditlink").setAttribute("href", link);
+                        } else {
+                            document.getElementById("fileeditlink").style.visibility = "hidden";
+                        }
+                        document.getElementById("cont").style.top = ev.clientY + "px";
+                        document.getElementById("cont").style.left = ev.clientX + "px";
+                        var files = document.getElementsByClassName("fileitem");
+                        for (i = 0; i < files.length; i++) {
+                            files[i].addEventListener("click", hidecontext, false);
+                        }
+                        document.getElementById("explorer").addEventListener("click", hidecontext, false);
+                    });
         });
+
+
     </script>
 {% endblock %}

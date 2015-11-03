@@ -1,16 +1,15 @@
 import time
 import urllib2
 from contextlib import contextmanager
-
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.core.urlresolvers import reverse_lazy
+from django.http import HttpResponse
 from django.shortcuts import render, redirect
 # Create your views here.
-from django.views.generic import View, DetailView, UpdateView, ListView, CreateView, TemplateView
+from django.views.generic import View, DetailView, UpdateView, ListView, CreateView, TemplateView, DeleteView
 from fabric.operations import local
 from httpproxy.views import HttpProxy
-
 from fiddles.models import Fiddle, FiddleFile
 from fiddles import models
 from dj import models as djmodels
@@ -23,6 +22,7 @@ def suppress(*exceptions):
         yield
     except exceptions:
         pass
+
 
 class FiddleMixin(object):
     """ Mixin to provide polymorphism via `select_subclasses` """
@@ -184,3 +184,67 @@ class CreateFiddle(LoginRequiredMixin, View):
                 "pk": self.object.id,
                 "path": self.object.entrypoint
             })
+
+
+class CreateFile(LoginRequiredMixin, FiddleMixin, CreateView):
+    model = FiddleFile
+    fields = ["path"]
+
+    template_name = "fiddles/fiddlefile_form.html"
+
+    def get_context_data(self, **kwargs):
+        context = super(CreateFile, self).get_context_data(**kwargs)
+        context['object'] = self.get_fiddle().fiddlefile_set.first()
+        return context
+    def dispatch(self, request, *args, **kwargs):
+        self.fiddle = self.get_fiddle()
+        return super(CreateFile, self).dispatch(request, *args, **kwargs)
+
+    def get_fiddle(self):
+        return Fiddle.objects.get_subclass(pk=self.kwargs['pk'])
+
+    def post(self, request, *args, **kwargs):
+        if not self.request.user == self.fiddle.owner:
+            raise PermissionDenied
+        return super(CreateFile, self).post(request, *args, **kwargs)
+
+    def form_valid(self, form):
+        obj = form.save(commit=False)
+        obj.fiddle = self.get_fiddle()
+        obj.save()
+        return redirect(reverse_lazy('file-edit', kwargs={"pk": self.kwargs['pk'], "path": obj.path}))
+
+
+class RenameFile(LoginRequiredMixin, UpdateView):
+    model = FiddleFile
+    fields = ["path"]
+
+    template_name = "fiddles/fiddlefile_form.html"
+
+    def dispatch(self, request, *args, **kwargs):
+        self.fiddle = self.get_fiddle()
+        if not self.request.user == self.fiddle.owner:
+            raise PermissionDenied
+        return super(RenameFile, self).dispatch(request, *args, **kwargs)
+
+    def get_fiddle(self):
+        return Fiddle.objects.get_subclass(pk=self.kwargs['pk'])
+
+    def get_success_url(self):
+        return reverse_lazy('file-edit', kwargs={"pk": self.kwargs['pk'], "path": self.object.path})
+
+
+class DeleteFile(LoginRequiredMixin, DeleteView):
+    model = FiddleFile
+
+    def dispatch(self, request, *args, **kwargs):
+        self.fiddle = self.get_fiddle()
+        if not self.request.user == self.fiddle.owner:
+            raise PermissionDenied
+        return super(DeleteFile, self).dispatch(request, *args, **kwargs)
+
+    def get_fiddle(self):
+        return Fiddle.objects.get_subclass(pk=self.kwargs['pk'])
+
+    def get_success_url(self):
+        return reverse_lazy('fiddle-detail', kwargs={"pk": self.kwargs['pk']})

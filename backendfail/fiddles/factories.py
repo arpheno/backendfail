@@ -7,7 +7,7 @@ class UserFactory(factory.DjangoModelFactory):
     class Meta:
         model = User
     email = 'admin@admin.com'
-    username = 'admine'
+    username = factory.sequence(lambda x: 'admine' + str(x))
     password = factory.PostGenerationMethodCall('set_password', 'adm1n')
 
     is_superuser = True
