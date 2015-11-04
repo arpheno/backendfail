@@ -20,6 +20,7 @@ webapp:
   volumes:
    - /usr/bin/docker:/bin/docker
    - /var/run/docker.sock:/var/run/docker.sock
+   - /usr/lib/x86_64-linux-gnu/libapparmor.so.1.1.0:/lib/x86_64-linux-gnu/libapparmor.so.1
    - ~/static:/usr/src/app/serve/static/
    - ~/media:/usr/src/app/media/
    - ./backendfail:/usr/src/app/
