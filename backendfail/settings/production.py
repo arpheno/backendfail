@@ -18,7 +18,6 @@ CACHES = {
         'LOCATION': 'cache:11211',
     }
 }
-DEBUG = True
 
 
 def show_toolbar(request):

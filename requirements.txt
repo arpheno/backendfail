@@ -12,3 +12,4 @@ pytest-bdd
 pytest-django
 psycopg2
 django-statsd-mozilla
+docker-py
