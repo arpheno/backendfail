@@ -1,12 +1,12 @@
 .. image:: https://circleci.com/gh/arpheno/backendfail.svg?style=svg
-:target: https://circleci.com/gh/arpheno/backendfail
+   :target: https://circleci.com/gh/arpheno/backendfail
     
 .. image:: https://coveralls.io/repos/arpheno/backendfail/badge.svg?branch=master&service=github 
-:target: https://coveralls.io/github/arpheno/backendfail?branch=master
+   :target: https://coveralls.io/github/arpheno/backendfail?branch=master
     
 .. image:: https://readthedocs.org/projects/backendfail/badge/?version=latest
-:target: http://backendfail.readthedocs.org/en/latest/?badge=latest
-    :alt: Documentation Status
+   :target: http://backendfail.readthedocs.org/en/latest/?badge=latest
+   :alt: Documentation Status
 
 backend.fail
 ============
