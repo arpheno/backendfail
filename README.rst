@@ -14,9 +14,11 @@ Coding is **fun**, and learning to code should be **fun too**.
 
 
     **"If you're not failing every now and again, it's a sign you're not doing anything very innovative."**
+    
     -- Woody Allen
 
     **"Failure is the first step to being sort of good at something"**
+    
     -- Jake the dog
 
 `backend.fail`_ is an interactive playground for backend development
@@ -56,8 +58,8 @@ The steps to write a container template:
 
             @property
             def startup_command(self):
-                """ This property specifies a command that should be executed by the container on
-                the commandline when it starts up."""
+                """ This property specifies a command that should be executed by the container 
+                on the commandline when it starts up."""
                 return r"bash -c 'python manage.py makemigrations &&" \
                        r" python manage.py migrate && python manage.py runserver 0.0.0.0:8000'"
 
