@@ -84,16 +84,6 @@ class DynProxyView(FiddleMixin, ProxyView):
         """
         return Fiddle.objects.select_subclasses().get(pk=self.kwargs['pk'])
 
-    def urlopen(self, method, request_url, body, headers,
-                redirect=False, decode_content=False, preload_content=False):
-        return self.http.urlopen(method,
-                                 request_url,
-                                 headers=HTTPHeaderDict(headers),
-                                 body=body,
-                                 redirect=False,
-                                 retries=self.retries,
-                                 decode_content=decode_content,
-                                 preload_content=preload_content)
 
     @property
     def base_url(self):
@@ -103,24 +93,6 @@ class DynProxyView(FiddleMixin, ProxyView):
             ip = "localhost"
         url = "http://" + ip + ":" + str(self.get_object().port)
         return url
-
-    def get_full_url(self, url):
-        """ There is a redundant slash at the end of the url, so we have to strip it """
-        import re
-        result = super(DynProxyView, self).get_full_url(url)
-        result = re.sub(r"(\d)//", r"\1/", result)
-        print result
-        return result
-
-    def create_request(self, url, body=None, headers={}):
-        """ This method needs to be overridden to strip the
-        headers from the original request. Otherwise in a
-        production environment, the SSL headers confuse the
-        embedded webservers, which do not understand SSL.
-        :return: The request with stripped headers
-        """
-        request = urllib2.Request(url, body, {})
-        return request
 
 
 class EditFile(LoginRequiredMixin, FiddleMixin, UpdateView):

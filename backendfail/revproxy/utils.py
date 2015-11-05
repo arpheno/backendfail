@@ -29,7 +29,7 @@ HTML_CONTENT_TYPES = (
 
 #: Variable used to represent a minimal content size required for response
 #: to be turned into stream
-MIN_STREAMING_LENGTH = 200 * 1024  # 4KB
+MIN_STREAMING_LENGTH = 4 * 1024  # 4KB
 
 #: Regex used to find charset in a html content type
 _get_charset_re = re.compile(r';\s*charset=(?P<charset>[^\s;]+)', re.I)
@@ -69,6 +69,8 @@ def should_stream(proxy_response):
     except ValueError:
         content_length = 0
 
+    if not content_length or content_length > MIN_STREAMING_LENGTH:
+        return True
 
     return False
 

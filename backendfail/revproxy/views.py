@@ -5,13 +5,17 @@ import re
 import sys
 import mimetypes
 import logging
+
 import urllib3
+
 from django.utils.six.moves.urllib.parse import (urljoin, urlparse,
                                                  urlencode, quote_plus)
+
 from django.shortcuts import redirect
 from django.views.generic import View
 from django.utils.decorators import classonlymethod
 from django.views.generic.base import ContextMixin
+
 from .exceptions import InvalidUpstream
 from .response import get_django_response
 from .utils import normalize_request_headers, encode_items
@@ -22,6 +26,7 @@ from .transformer import DiazoTransformer
 #   (Lines 1433-1449)
 QUOTE_SAFE = '<.;>\(}*+|~=-$/_:^@)[{]&\'!,"`'
 
+
 ERRORS_MESSAGES = {
     'upstream-no-scheme': ("Upstream URL scheme must be either "
                            "'http' or 'https' (%s).")
@@ -31,8 +36,8 @@ HTTP_POOLS = urllib3.PoolManager()
 
 
 class ProxyView(View):
-    """View responsible for executing proxy requests, processing them
-     and returning their responses.
+    """View responsable by excute proxy requests, process and return
+    their responses.
 
     """
     _upstream = None
@@ -40,13 +45,7 @@ class ProxyView(View):
     add_remote_user = False
     default_content_type = 'application/octet-stream'
     retries = None
-    rewrite = tuple()  # It will be overridden by a tuple inside tuple.
-
-    @classonlymethod
-    def as_view(cls, **initkwargs):
-        view = super(ProxyView, cls).as_view(**initkwargs)
-        view.csrf_exempt = True
-        return view
+    rewrite = tuple()  # It will be overrided by a tuple inside tuple.
 
     def __init__(self, *args, **kwargs):
         super(ProxyView, self).__init__(*args, **kwargs)
@@ -84,6 +83,12 @@ class ProxyView(View):
             upstream += '/'
 
         return upstream
+
+    @classonlymethod
+    def as_view(cls, **initkwargs):
+        view = super(ProxyView, cls).as_view(**initkwargs)
+        view.csrf_exempt = True
+        return view
 
     def _format_path_to_redirect(self, request):
         full_path = request.get_full_path()
@@ -136,11 +141,14 @@ class ProxyView(View):
             self.log.debug("Request URL: %s", request_url)
 
         try:
-            proxy_response = self.urlopen(request.method,
-                                          request_url,
-                                          headers=request_headers,
-                                          body=request_payload,
-                                          )
+            proxy_response = self.http.urlopen(request.method,
+                                               request_url,
+                                               redirect=False,
+                                               retries=self.retries,
+                                               headers=request_headers,
+                                               body=request_payload,
+                                               decode_content=False,
+                                               preload_content=False)
             self.log.debug("Proxy response header: %s",
                            proxy_response.getheaders())
         except urllib3.exceptions.HTTPError as error:
@@ -148,17 +156,6 @@ class ProxyView(View):
             raise
 
         return proxy_response
-
-    def urlopen(self, method, request_url, body, headers,
-                redirect=False, decode_content=False, preload_content=False):
-        return self.http.urlopen(method,
-                                 request_url,
-                                 headers,
-                                 body=body,
-                                 redirect=redirect,
-                                 retries=self.retries,
-                                 decode_content=decode_content,
-                                 preload_content=preload_content)
 
     def _replace_host_on_redirect_location(self, request, proxy_response):
         location = proxy_response.headers.get('Location')
