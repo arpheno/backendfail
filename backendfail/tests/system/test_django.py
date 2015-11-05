@@ -13,7 +13,7 @@ def test_django_launch_functional():
     obj = DjangoFiddleFactory.create()
     obj.save()
     c = Client()
-    response = c.get(reverse_lazy('result', kwargs={"pk": obj.id, "url": ""}))
+    response = c.get(reverse_lazy('result', kwargs={"pk": obj.id, "path": ""}))
     assert response.status_code == 200
 
 
@@ -24,7 +24,7 @@ def test_django_launch_twice():
     obj = DjangoFiddleFactory.create()
     obj.save()
     c = Client()
-    response = c.get(reverse_lazy('result', kwargs={"pk": obj.id, "url": ""}))
+    response = c.get(reverse_lazy('result', kwargs={"pk": obj.id, "path": ""}))
     assert response.status_code == 200
-    response = c.get(reverse_lazy('result', kwargs={"pk": obj.id, "url": ""}))
+    response = c.get(reverse_lazy('result', kwargs={"pk": obj.id, "path": ""}))
     assert response.status_code == 200

@@ -1,0 +1,10 @@
+{% extends 'app/app.html' %}
+{% block content %}
+    <h2> Blog list</h2>
+    <a href="{% url 'blog-create' %}">Create new blog!</a>
+    <ul>
+        {% for object in object_list %}
+            <li>Blogname: {{ object.name }}</li>
+        {% endfor %}
+    </ul>
+{% endblock %}

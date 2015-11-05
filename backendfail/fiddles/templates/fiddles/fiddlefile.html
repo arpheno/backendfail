@@ -2,7 +2,8 @@
 {% load static %}
 {% block header %}
     <a>
-        <paper-button name="submit-file" onclick="update_file();" style="font-weight:bold;color:white">Save File
+        <paper-button name="submit-file" onclick="update_file();"
+                      style="font-weight:bold;color:white">Save File
         </paper-button>
     </a>
 {% endblock %}
@@ -11,17 +12,21 @@
     <ul>
         {% for file in object.fiddle.fiddlefile_set.all %}
             {% if user == object.fiddle.owner %}
-                <a class="fileitem" href="{% url 'file-edit' pk=object.fiddle.id path=file.path %}">
+                <a class="fileitem"
+                   href="{% url 'file-edit' pk=object.fiddle.id path=file.path %}">
             {% else %}
-                <a class="fileitem" href="{% url 'file-view' pk=object.fiddle.id path=file.path %}">
+                <a class="fileitem"
+                   href="{% url 'file-view' pk=object.fiddle.id path=file.path %}">
             {% endif %}
-        <paper-card {% if file == object %}style="background-color: rgba(11, 128, 67, 0.25)"{% endif %}>
+        <paper-card
+                {% if file == object %}style="background-color: rgba(11, 128, 67, 0.25)"{% endif %}>
             {{ file.path }}
         </paper-card>
         </a>
         {% endfor %}
     </ul>
-    <a style="position:absolute; bottom:53px;right:24px;" href="{% url 'file-create' pk=object.fiddle.id %}">
+    <a style="position:absolute; bottom:53px;right:24px;"
+       href="{% url 'file-create' pk=object.fiddle.id %}">
         <paper-fab icon="add"></paper-fab>
     </a>
     <style type="text/css">
@@ -43,6 +48,10 @@
         #cont paper-item:hover, .cont paper-item:hover {
             background-color: #00b8d4;
         }
+
+        iframe {
+            z-index: 30;
+        }
     </style>
     <paper-menu id="cont" class="offscreen">
         <a href="{% url 'file-create' pk=object.fiddle.id %}">
@@ -56,9 +65,11 @@
 {% block content %}
 
     <div id="editor"></div>
-    <wrapped-iframe load="/{{ object.fiddle.id }}/result/" src="/static/loading.html" id="preview"
+    <wrapped-iframe load="/{{ object.fiddle.id }}/result/" src="/static/loading.html"
+                    id="preview"
                     baseurl="/{{ object.fiddle.id }}/result/"></wrapped-iframe>
-    <script src="//d1n0x3qji82z53.cloudfront.net/src-min-noconflict/ace.js" type="text/javascript"
+    <script src="//d1n0x3qji82z53.cloudfront.net/src-min-noconflict/ace.js"
+            type="text/javascript"
             charset="utf-8"></script>
     <script type="text/javascript">
         function iframe_refresh() {
@@ -81,6 +92,17 @@
              from fiddlefile.html */
         {% endblock %}
         $(function () {
+            $("iframe").load(function () {
+{#                setTimeout(function () {#}
+{#                    $('a', $('iframe').contents()).each(#}
+{#                            function () {#}
+{#                                if ($(this)[0].href[0] == "/") {#}
+{#                                    $(this)[0].setAttribute("href", $(this)[0].baseURI + $(this)[0].href);#}
+{#                                }#}
+{#                            }#}
+{#                    );#}
+{#                }, 500);#}
+            });
             var editor = ace.edit("editor");
             // Below we render the file_content from django into javascript
             var con = "{{ file_content|escapejs }}";
