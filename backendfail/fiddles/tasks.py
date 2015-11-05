@@ -1,40 +1,45 @@
-import os
-import re
-from random import randint
 from celery import shared_task
-from fabric.context_managers import lcd
-from fabric.operations import local
-from settings.basic import BASE_DIR
+from docker.utils import create_host_config
+from docker import Client
+
+
+def get_container_by_name(client, name):
+    return [c for c in client.containers(all=True) if "/" + name in c["Names"]][0]
 
 
 @shared_task
-def launch_container(hash, image, internal_port, startup_command):
+def launch_container(fiddle):
     """
-    :param hash: The hash of the Fiddle to start. It will become the name of the container
-    :param image: The image that we should launch
-    :param internal_port: The port that the internal webserver of the framework listens on
-    :param startup_command: The command that should be executed on startup
-    :return: The exposed port
+    This task takes care of launching the docker container.
     """
-    internal_port = str(internal_port)
-    image = str(image)
-    command = str(startup_command)
-    while True:  # Try to find a fre port
-        exposed_port = randint(8050, 12000)
-        try:
-            ps = local("docker start " + hash + '  && docker ps --all | grep ' + hash,
-                       capture=True)
-            exposed_port = re.search(r".*?:(\d{4,5})", ps).group(1)
-            return exposed_port
-        except SystemExit as e:
-            # We should replace this with docker-py
-            cmd = ["docker run"]
-            cmd.append('--name ' + hash)
-            cmd.append('-v /var/containers/' + hash + ':/usr/src/app')
-            cmd.append('-w /usr/src/app')
-            cmd.append('-p ' + str(exposed_port) + ':' + internal_port + '')
-            cmd.append('-d')
-            cmd.append(image)
-            cmd.append(command)
-            local(' '.join(cmd))
-            return exposed_port
+    image = str(fiddle.docker_image)
+    container_root, internal_root = '/var/containers/', '/usr/src/app'
+    ports, volumes = [int(fiddle.internal_port)], [internal_root]
+    api = Client(base_url='unix://var/run/docker.sock')
+    try:
+        myc = get_container_by_name(api, fiddle.hash)
+        api.start(myc["Id"])
+        myc = get_container_by_name(api, fiddle.hash)
+        return myc["Ports"][0]["PublicPort"]
+    except IndexError as e:
+        # The IndexError indicated that this container has never been run yet,
+        # so we should create it.
+        host_config = create_host_config(
+            # We bind the internal server port to a high port, let docker take care of it
+            port_bindings={int(fiddle.internal_port): None},
+            # Also mount the skeleton to the container
+            binds=[container_root + fiddle.hash + ':' + internal_root])
+        # Now start this whole shebang
+        container = api.create_container(
+            image=image,
+            ports=ports,
+            volumes=volumes,
+            working_dir=internal_root,
+            command=fiddle.startup_command,
+            name=fiddle.hash,
+            host_config=host_config,
+            detach=True)
+        api.start(container["Id"])
+        # We have to get the port from the container now
+        myc = get_container_by_name(api, fiddle.hash)
+        return myc["Ports"][0]["PublicPort"]
