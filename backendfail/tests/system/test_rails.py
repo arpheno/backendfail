@@ -16,5 +16,5 @@ def test_rails_launch_functional():
     obj = RailsFiddleFactory.create()
     obj.save()
     c = Client()
-    response = c.get(reverse_lazy('result', kwargs={"pk": obj.id, "url": ""}))
+    response = c.get(reverse_lazy('result', kwargs={"pk": obj.id, "path": ""}))
     assert response.status_code == 200

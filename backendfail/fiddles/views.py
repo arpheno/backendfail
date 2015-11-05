@@ -65,10 +65,11 @@ class DynProxyView(FiddleMixin, ProxyView):
                 result = super(DynProxyView, self).dispatch(request, path)
                 if "location" in result._headers:
                     location = result._headers["location"][1]
-                    location = location[location.find("host:"):]
+                    location = location[location.find("//")+3:]
                     path = location[location.find("/"):]
                     base = request.build_absolute_uri()
                     base = base[:base.find("t//") + 2]
+                    print base, path
                     result._headers["location"] = ('Location', base + path + "/")
                 break
             except:
