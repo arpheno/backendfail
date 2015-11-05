@@ -34,7 +34,10 @@
     You can edit the other files as well, and create models and
     views to demonstrate code to others.
 </p>
-
+{% block content %}
+    <a href="{% url 'blog-create' %}">Create new blog!</a>
+    <a href="{% url 'blog-list' %}">View blogs</a>
+{% endblock %}
 <p>
     If you would like to learn django you can find a tutorial
     <a href="https://docs.djangoproject.com/en/1.8/intro/tutorial01/">here</a>,

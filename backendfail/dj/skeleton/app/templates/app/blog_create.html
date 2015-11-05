@@ -1,0 +1,10 @@
+{% extends 'app/app.html' %}
+{% block content %}
+    <a href="{% url 'blog-list' %}">View blogs</a>
+    <h1> Create your new blog!</h1>
+    <form action="" method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button>Submit</button>
+    </form>
+{% endblock %}

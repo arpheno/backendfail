@@ -125,7 +125,7 @@ The steps to write a container template:
 
 
 .. toctree::
-:maxdepth: 2
+    :maxdepth: 2
 
 .. [1] `Question on Django`_
 .. [2] `Question on Rails`_

@@ -7,12 +7,18 @@ from django.core.urlresolvers import reverse_lazy
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
 # Create your views here.
-from django.views.generic import View, DetailView, UpdateView, ListView, CreateView, TemplateView, DeleteView
+from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import csrf_exempt
+from django.views.generic import View, DetailView, UpdateView, ListView, CreateView, \
+    TemplateView, DeleteView
 from fabric.operations import local
 from httpproxy.views import HttpProxy
+from requests.packages.urllib3._collections import HTTPHeaderDict
+
 from fiddles.models import Fiddle, FiddleFile
 from fiddles import models
 from dj import models as djmodels
+from revproxy.views import ProxyView
 from ror import models as rormodels
 
 
@@ -38,22 +44,32 @@ class LoginRequiredMixin(object):
         return login_required(view)
 
 
-class DynProxyView(FiddleMixin, HttpProxy):
+class DynProxyView(FiddleMixin, ProxyView):
     """ This is where the magic happens """
+    retries = 10
 
-    def dispatch(self, request, url, *args, **kwargs):
+    @method_decorator(csrf_exempt)
+    def dispatch(self, request, path, *args, **kwargs):
         """
-        The parent implementation is to proxy the request and return it from the upstream server.
+        The parent implementation is to proxy the request and return it from the
+        upstream server.
         Before we start proxying, we have to run the docker container and start it,
         perform startup tasks and wait for these to finish. This takes some time so
         we wait a few seconds.
-        After the request has been processed we call the cleanup method, which takes care of either
-        destroying or stopping the container.
-        """
+        After the request has been processed we call the cleanup method, which takes
+        care of either destroying or stopping the container. """
         self.get_object().spawn()
+        self.upstream = self.base_url
         while True:
             try:
-                result = super(DynProxyView, self).dispatch(request, url, *args, **kwargs)
+                result = super(DynProxyView, self).dispatch(request, path)
+                if "location" in result._headers:
+                    location = result._headers["location"][1]
+                    location = location[location.find("host:"):]
+                    path = location[location.find("/"):]
+                    base = request.build_absolute_uri()
+                    base = base[:base.find("t//") + 2]
+                    result._headers["location"] = ('Location', base + path + "/")
                 break
             except:
                 print self.base_url
@@ -67,7 +83,16 @@ class DynProxyView(FiddleMixin, HttpProxy):
         """
         return Fiddle.objects.select_subclasses().get(pk=self.kwargs['pk'])
 
-    rewrite = True
+    def urlopen(self, method, request_url, body, headers,
+                redirect=False, decode_content=False, preload_content=False):
+        return self.http.urlopen(method,
+                                 request_url,
+                                 headers=HTTPHeaderDict(headers),
+                                 body=body,
+                                 redirect=False,
+                                 retries=self.retries,
+                                 decode_content=decode_content,
+                                 preload_content=preload_content)
 
     @property
     def base_url(self):
@@ -80,8 +105,11 @@ class DynProxyView(FiddleMixin, HttpProxy):
 
     def get_full_url(self, url):
         """ There is a redundant slash at the end of the url, so we have to strip it """
+        import re
         result = super(DynProxyView, self).get_full_url(url)
-        return result[:-1]
+        result = re.sub(r"(\d)//", r"\1/", result)
+        print result
+        return result
 
     def create_request(self, url, body=None, headers={}):
         """ This method needs to be overridden to strip the
@@ -121,7 +149,8 @@ class EditFile(LoginRequiredMixin, FiddleMixin, UpdateView):
             # if it doesn't belong to the user we create a new fiddle.
             result = self.copy_fiddle()
             return redirect(reverse_lazy('file-edit',
-                                         kwargs={"pk": result.id, "path": self.kwargs['path']}))
+                                         kwargs={"pk"  : result.id,
+                                                 "path": self.kwargs['path']}))
         return super(EditFile, self).get(request, *args, **kwargs)
 
     def get_object(self, queryset=None):
@@ -150,7 +179,8 @@ class ViewFile(FiddleMixin, DetailView):
         return context
 
     def get_object(self, queryset=None):
-        return Fiddle.objects.get(pk=self.kwargs['pk']).fiddlefile_set.get(path=self.kwargs['path'])
+        return Fiddle.objects.get(pk=self.kwargs['pk']).fiddlefile_set.get(
+            path=self.kwargs['path'])
 
 
 class FiddleView(FiddleMixin, DetailView):
@@ -181,7 +211,7 @@ class CreateFiddle(LoginRequiredMixin, View):
         return reverse_lazy(
             "file-edit",
             kwargs={
-                "pk": self.object.id,
+                "pk"  : self.object.id,
                 "path": self.object.entrypoint
             })
 
@@ -196,6 +226,7 @@ class CreateFile(LoginRequiredMixin, FiddleMixin, CreateView):
         context = super(CreateFile, self).get_context_data(**kwargs)
         context['object'] = self.get_fiddle().fiddlefile_set.first()
         return context
+
     def dispatch(self, request, *args, **kwargs):
         self.fiddle = self.get_fiddle()
         return super(CreateFile, self).dispatch(request, *args, **kwargs)
@@ -212,7 +243,8 @@ class CreateFile(LoginRequiredMixin, FiddleMixin, CreateView):
         obj = form.save(commit=False)
         obj.fiddle = self.get_fiddle()
         obj.save()
-        return redirect(reverse_lazy('file-edit', kwargs={"pk": self.kwargs['pk'], "path": obj.path}))
+        return redirect(
+            reverse_lazy('file-edit', kwargs={"pk": self.kwargs['pk'], "path": obj.path}))
 
 
 class RenameFile(LoginRequiredMixin, UpdateView):
@@ -231,7 +263,8 @@ class RenameFile(LoginRequiredMixin, UpdateView):
         return Fiddle.objects.get_subclass(pk=self.kwargs['pk'])
 
     def get_success_url(self):
-        return reverse_lazy('file-edit', kwargs={"pk": self.kwargs['pk'], "path": self.object.path})
+        return reverse_lazy('file-edit',
+                            kwargs={"pk": self.kwargs['pk'], "path": self.object.path})
 
 
 class DeleteFile(LoginRequiredMixin, DeleteView):

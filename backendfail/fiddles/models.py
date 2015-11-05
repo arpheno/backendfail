@@ -95,7 +95,7 @@ class Fiddle(models.Model):
         # self._delete_files()
 
     def _stop(self):
-        local('docker stop -t 1 ' + self.hash)
+        local('docker stop -t 0 ' + self.hash)
 
     def _remove(self):
         local('docker rm ' + self.hash)
