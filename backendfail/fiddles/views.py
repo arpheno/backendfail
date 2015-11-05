@@ -62,6 +62,9 @@ class DynProxyView(FiddleMixin, ProxyView):
         self.upstream = self.base_url
         while True:
             try:
+                print path
+                if path and path[0]=="/":
+                    path=path[1:]
                 result = super(DynProxyView, self).dispatch(request, path)
                 if "location" in result._headers:
                     location = result._headers["location"][1]
