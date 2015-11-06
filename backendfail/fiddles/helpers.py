@@ -1,5 +1,8 @@
+import os
 from contextlib import contextmanager
 from docker.utils import create_host_config
+
+from settings.basic import BASE_DIR
 
 
 class DoesNotExist(Exception):
@@ -69,3 +72,13 @@ def write_file_to_disk(path, content):
         os.makedirs(dirpath)
     with open(path, 'w') as file:
         file.write(content)
+
+
+def read_files_from_disc( directory):
+    for root, dirs, files in os.walk(directory, topdown=False):
+        for name in files:
+            path = os.path.join(BASE_DIR, root, name)
+            if path.startswith(directory, ):
+                path = path.replace(directory, '', 1)
+            with open(os.path.join(root, name)) as source:
+                yield path, source.read()

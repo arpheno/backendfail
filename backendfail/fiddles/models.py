@@ -5,12 +5,10 @@ from django.conf.global_settings import AUTH_USER_MODEL
 from django.core.exceptions import ValidationError
 from django.core.urlresolvers import reverse_lazy
 from django.db import models
-from fabric.operations import local
 from model_utils.managers import InheritanceManager
 # Create your models here.
 from fiddles.tasks import start_container, stop_container, remove_container
-from fiddles.helpers import write_file_to_disk
-from settings.basic import BASE_DIR
+from fiddles.helpers import write_file_to_disk, read_files_from_disc
 
 
 def get_upload_path(instance, filename):
@@ -25,66 +23,40 @@ class Fiddle(models.Model):
 
     @property
     def internal_port(self):
-        """ This property specifies the port the webserver is listening on inside the
-        container.
-        For an example see `DjangoFiddle`.  """
-        raise NotImplementedError(
-            "This should be implemented by every subclass of Fiddle")
+        """ The port the webframework is listening on inside the container."""
+        raise NotImplementedError("Should be implemented by every subclass of Fiddle")
 
     @property
     def startup_command(self):
-        """ This property specifies a command that should be executed by the container on
-        the commandline when it starts up.
-        For an example see `DjangoFiddle`.  """
-        raise NotImplementedError(
-            "This should be implemented by every subclass of Fiddle")
+        """ The command that should be run in the container when it starts up."""
+        raise NotImplementedError("Should be implemented by every subclass of Fiddle")
 
     @property
     def docker_image(self):
-        """ This property specifies an image from the docker hub that should be run.
-        It should expect the user sources under /usr/src/app/
-        For an example see `DjangoFiddle`.  """
-        raise NotImplementedError(
-            "This should be implemented by every subclass of Fiddle")
+        """Image from the docker hub to run. The skeleton will mount at /usr/src/app/"""
+        raise NotImplementedError("Should be implemented by every subclass of Fiddle")
 
     @property
     def entrypoint(self):
-        """ This property defines the path to the file that a user should
-        be redirected to when they create a new fiddle.
-        For an example see `DjangoFiddle`.  """
-        raise NotImplementedError(
-            "This should be implemented by every subclass of Fiddle")
+        """ The file that a user should be redirected to when they create a new fiddle."""
+        raise NotImplementedError("Should be implemented by every subclass of Fiddle")
 
     @property
     def prefix(self):
-        """ This property defines where the project skeleton
-        is located. `Fiddle` will walk that directory and create `FiddleFiles`
-        based on the skeleton, when a new `Fiddle` instance is created.
-        For an example see `DjangoFiddle`.  """
-        raise NotImplementedError(
-            "This should be implemented by every subclass of Fiddle")
+        """ Where the project skeleton is located. """
+        raise NotImplementedError("Should be implemented by every subclass of Fiddle")
 
     def spawn(self):
-        self.hash = hashlib.md5(''.join(
-            fiddlefile.content for fiddlefile in self.fiddlefile_set.all())).hexdigest()
-        self.save()
-        # Write the content of the files to disk.
-        for fiddlefile in self.fiddlefile_set.all():
-            write_file_to_disk(os.path.join(self.root, fiddlefile.path),
-                               fiddlefile.content)
         # Launch the docker container
+        self.write_to_disk()
         self.port = start_container(self)
         self.save()
 
     def cleanup(self):
-        stop_container(self).delay()
+        stop_container.delay(self)
 
     def _remove(self):
-        remove_container(self).delay()
-
-    @property
-    def root(self):
-        return os.path.join("/var/containers", self.hash)
+        remove_container.delay(self)
 
     def get_absolute_url(self):
         return reverse_lazy('fiddle-detail', kwargs={"pk": self.id})
@@ -96,22 +68,32 @@ class Fiddle(models.Model):
             "fiddle" : self
         }
         FiddleFile.objects.create(**config).save()
-    def read_files_from_disc(self, directory):
-        for root, dirs, files in os.walk(directory, topdown=False):
-            for name in files:
-                path = os.path.join(BASE_DIR, root, name)
-                if path.startswith(directory, ):
-                    path = path.replace(directory, '', 1)
-                with open(os.path.join(root, name)) as source:
-                    self.create_file(path, source.read())
+
 
     def save(self, *args, **kwargs):
-        if not self.id:
+        """`Fiddle` will walk its prefix directory and create `FiddleFiles`
+        based from it, when a new `Fiddle` instance is created."""
+        if not self.id: # A new fiddle! Let's create its files.
             result = super(Fiddle, self).save(*args, **kwargs)
-            self.read_files_from_disc(self.prefix)
-        else:
+            for path, content in read_files_from_disc(self.prefix):
+                self.create_file(path, content)
+        else: # ... this fiddle already had its files created.
             result = super(Fiddle, self).save(*args, **kwargs)
         return result
+
+    @property
+    def hash(self):
+        return hashlib.md5(''.join(
+            fiddlefile.content for fiddlefile in self.fiddlefile_set.all())).hexdigest()
+
+    @property
+    def root(self):
+        return os.path.join("/var/containers", self.hash)
+
+    def write_to_disk(self):
+        for file in self.fiddlefile_set.all():
+            path = os.path.join(self.root, file.path)
+            write_file_to_disk(path, file.content)
 
 
 class FiddleFile(models.Model):

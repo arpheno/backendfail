@@ -20,9 +20,6 @@ def test_django_creation():
 def test_django_write_files():
     obj = DjangoFiddleFactory()
     obj.save()
-    obj = DjangoFiddle.objects.get(id=obj.id)
-    obj._hash()
-    obj._write_files()
     assert os.path.exists(obj.root)
     assert os.path.exists(os.path.join(obj.root, 'app'))
     assert os.path.exists(os.path.join(obj.root, 'app', '__init__.py'))
