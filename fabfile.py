@@ -14,7 +14,9 @@ def test():
 def celery():
     ps = local('ps aux', capture=True)
     if not " -A settings worker" in ps:
-        local('cd backendfail && celery -A settings worker --loglevel=INFO &')  # this is probably really bad
+        local(
+            'cd backendfail && celery -A settings worker --loglevel=INFO &')  # this is
+        #  probably really bad
         time.sleep(5)
     yield
     local('killall celery')  # this is probably really bad
@@ -27,13 +29,19 @@ def suppress(*exceptions):
     except exceptions:
         pass
 
+
 def dev():
-    with celery(),rabbitmq():
-        local('cd backendfail && python manage.py migrate && python manage.py runserver 0.0.0.0:8000')  # this is probably really bad
+    with celery(), rabbitmq():
+        local(
+            'cd backendfail && python manage.py migrate && python manage.py runserver '
+            '0.0.0.0:8000')  # this is probably really bad
+
 
 @contextmanager
 def runserver():
-    local('cd backendfail && python manage.py migrate && python manage.py runserver 0.0.0.0:9000 &')  # this is probably really bad
+    local(
+        'cd backendfail && python manage.py migrate && python manage.py runserver '
+        '0.0.0.0:9000 &')  # this is probably really bad
     time.sleep(10)
     yield
     with suppress(SystemError):
@@ -68,19 +76,25 @@ def test():
 
 
 def localcoverage():
-        local( r'coverage run --omit="backendfail/tests/**,backendfail/settings/**,**/skeleton/**"'
-            r' --source backendfail -m py.test -m "not ui" -v backendfail/tests')
+    local(
+        r'coverage run --omit="backendfail/tests/**,backendfail/settings/**,'
+        r'**/skeleton/**"'
+        r' --source backendfail -m py.test -m "not ui" -v backendfail/tests')
 
 
 def coverage():
     with celery(), runserver():
         local(
-            r'coverage run --omit="backendfail/tests/**,backendfail/settings/**,**/skeleton/**"'
+            r'coverage run --omit="backendfail/tests/**,backendfail/settings/**,'
+            r'**/skeleton/**"'
             r' --source backendfail -m py.test -m "not ui" -v backendfail/tests')
+#        local(r'py.test -m "ui" -v backendfail/tests')
 
 
 def graphite():
-    local(r"docker run --name graphite -p 8005:80 -p 2003:2003 -p 8125:8125/udp -d hopsoft/graphite-statsd")
+    local(
+        r"docker run --name graphite -p 8005:80 -p 2003:2003 -p 8125:8125/udp -d "
+        r"hopsoft/graphite-statsd")
 
 
 @contextmanager
@@ -92,7 +106,8 @@ def selenium():
         local(r"docker stop selenium")
     except:
         local(
-            r"docker run --net='host' --name selenium -d -p 4444:4444 selenium/standalone-chrome")
+            r"docker run --net='host' --name selenium -d -p 4444:4444 "
+            r"selenium/standalone-chrome")
         time.sleep(3)
         with selenium():
             yield
@@ -105,7 +120,8 @@ def rabbitmq():
         yield
         local(r"docker stop rabbitmq")
     except:
-        local("docker run -d --name rabbitmq -p 5672:5672 -p 15672:15672 rabbitmq", capture=True)
+        local("docker run -d --name rabbitmq -p 5672:5672 -p 15672:15672 rabbitmq",
+              capture=True)
         time.sleep(10)
         with rabbitmq():
             yield
@@ -114,7 +130,8 @@ def rabbitmq():
 def postgresql():
     try:
         sudo(
-            r"docker run  --name postgresql -p 5432:5432 -e 'DB_USER=backendfail' -e 'DB_NAME=backendfail' -e 'DB_PASS=backendfail' -d sameersbn/postgresql")
+            r"docker run  --name postgresql -p 5432:5432 -e 'DB_USER=backendfail' -e "
+            r"'DB_NAME=backendfail' -e 'DB_PASS=backendfail' -d sameersbn/postgresql")
     except:
         sudo(r"docker start postgresql")
 
@@ -141,15 +158,18 @@ def init_git(destination='production'):
     with cd("backendfail"):
         run("git init --bare")
     try:
-        local("git remote add " + destination + " backendfail@" + env.hosts[0].split("@")[1] + ":backendfail")
+        local("git remote add " + destination + " backendfail@" + env.hosts[0].split("@")[
+            1] + ":backendfail")
     except:
         pass
     with cd("backendfail/hooks"):
         postreceive = """'#!/bin/bash
 git --work-tree=/var/www/bf/ checkout -f master
 source /var/www/bf/env/bin/activate && cd /var/www/bf/ && pip install -r requirements.txt
-source /var/www/bf/env/bin/activate && cd /var/www/bf/backendfail && python manage.py migrate --settings=settings.production
-source /var/www/bf/env/bin/activate && cd /var/www/bf/backendfail && python manage.py collectstatic --noinput
+source /var/www/bf/env/bin/activate && cd /var/www/bf/backendfail && python manage.py
+migrate --settings=settings.production
+source /var/www/bf/env/bin/activate && cd /var/www/bf/backendfail && python manage.py
+collectstatic --noinput
 source /var/www/bf/env/bin/activate && cd /var/www/bf/backendfail && bower install
 sudo service supervisor restart
 sudo nginx -s reload'"""
@@ -199,8 +219,12 @@ def install_requirements(root='/var/www/bf'):
 
 def symlink_config(root='/var/www/bf'):
     sudo("rm -f /etc/nginx/sites-enabled/default")
-    sudo("ln -sfn " + root + "/conf/supervisor.conf /etc/supervisor/conf.d/backendfail.conf -f")
-    sudo("ln -sfn " + root + "/conf/nginx.conf /etc/nginx/sites-enabled/backendfail.conf -f")
+    sudo(
+        "ln -sfn " + root + "/conf/supervisor.conf "
+                            "/etc/supervisor/conf.d/backendfail.conf -f")
+    sudo(
+        "ln -sfn " + root + "/conf/nginx.conf /etc/nginx/sites-enabled/backendfail.conf "
+                            "-f")
 
 
 def management_commands(root='/var/www/bf'):
