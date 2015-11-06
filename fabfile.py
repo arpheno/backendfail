@@ -82,6 +82,9 @@ def localcoverage():
         r' --source backendfail -m py.test -m "not ui" -v backendfail/tests')
 
 
+def test_development():
+    local(r'docker-compose -f etc/test_development.yml pull')
+    local(r'docker-compose -f etc/test_development.yml up')
 def coverage():
     with celery(), runserver():
         local(
