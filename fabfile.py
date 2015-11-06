@@ -5,11 +5,6 @@ from fabric.operations import local, sudo, run
 from fabric.api import *
 
 
-def test():
-    with lcd('backendfail'):
-        local('py.test django/test.py')
-
-
 @contextmanager
 def celery():
     ps = local('ps aux', capture=True)
@@ -20,6 +15,15 @@ def celery():
         time.sleep(5)
     yield
     local('killall celery')  # this is probably really bad
+
+
+@contextmanager
+def conditional(condition, manager, *args):
+    if condition:
+        with manager(*args):
+            yield
+    else:
+        yield
 
 
 @contextmanager
@@ -39,59 +43,46 @@ def dev():
 
 @contextmanager
 def runserver():
-    local(
-        'cd backendfail && python manage.py migrate && python manage.py runserver '
-        '0.0.0.0:9000 &')  # this is probably really bad
-    time.sleep(10)
+    with lcd("backendfail"):
+        local(r'python manage.py migrate')
+        local(r'python manage.py runserver 0.0.0.0:9000 &')
+        time.sleep(3)
     yield
-    with suppress(SystemError):
-        local('killall python')
-
-
-def rdocker():
-    cmd = ["docker run"]
-    cmd.append(" -it")
-    cmd.append("--rm")
-    cmd.append('--user "$(id -u):$(id -g)"')
-    cmd.append('-v "$PWD":/usr/src/app "')
-    cmd.append("-w /usr/src/app rails ")
-    cmd.append("rails new --skip-bundle webapp")
-    local(' '.join(cmd))
-
-
-def ddocker(project='djangoname0'):
-    with lcd("backendfail/media/djangoname0"):
-        cmd = ["docker run"]
-        cmd.append("--name " + project)
-        cmd.append('-v "$PWD":/usr/src/app')
-        cmd.append('-w /usr/src/app')
-        cmd.append('-p 8000:8000')
-        cmd.append('-d django')
-        cmd.append('bash -c "python manage.py runserver 0.0.0.0:8000"')
-        local(' '.join(cmd))
-
-
-def test():
-    return local(r'py.test -n 4 tests')
-
-
-def localcoverage():
-    local(
-        r'coverage run --omit="backendfail/tests/**,backendfail/settings/**,'
-        r'**/skeleton/**"'
-        r' --source backendfail -m py.test -m "not ui" -v backendfail/tests')
+    with lcd("backendfail"), suppress(SystemError):
+        local(r'rm -f db.sqlite3')
+        local(r'killall python')
 
 
 def test_development():
     local(r'docker-compose -f etc/test_development.yml pull')
     local(r'docker-compose -f etc/test_development.yml up')
+
+
 def coverage():
-    with celery(), runserver():
-        local(
-            r'coverage run --omit="backendfail/tests/**,backendfail/settings/**,'
-            r'**/skeleton/**"'
-            r' --source backendfail -m py.test -m "not ui" -v backendfail/tests')
-#        local(r'py.test -m "ui" -v backendfail/tests')
+    o = ','.join(["backendfail/tests/**", "backendfail/settings/**,**/skeleton/**"])
+    s = "backendfail"
+    return r'coverage run --append --omit="' + o + '" --source ' + s + " -m "
+
+
+def _test(*selectors):
+    local("rm -f .coverage")
+    tags = [' "' + selector + '" ' for selector in selectors]
+    pytest_arguments = '-v backendfail/tests'
+    with conditional('ui' in selectors, runserver):
+        for tag in tags:
+            local(coverage() + r'py.test -m' + tag + pytest_arguments)
+
+
+def test(*selectors):
+    with conditional('ui' in selectors, selenium):
+        _test(selectors)
+
+
+def test_ci_environment():
+    _test("unit", "integration", "system", "ui")
+
+
+# local(r'py.test -m "ui" -v backendfail/tests')
 
 
 def graphite():
@@ -102,18 +93,10 @@ def graphite():
 
 @contextmanager
 def selenium():
-    try:
-        local(r"docker start selenium")
-        time.sleep(3)
-        yield
-        local(r"docker stop selenium")
-    except:
-        local(
-            r"docker run --net='host' --name selenium -d -p 4444:4444 "
-            r"selenium/standalone-chrome")
-        time.sleep(3)
-        with selenium():
-            yield
+    image = "selenium/standalone-chrome"
+    local(r"docker run --net='host' --name selenium -d " + image)
+    yield
+    local(r"docker rm -f selenium")
 
 
 @contextmanager
@@ -264,6 +247,8 @@ def clean():
         local("rm -rf ~/backendfail/")
     except:
         pass
+
+
 def deploy_staging():
     run("cd backendfail && docker-compose stop ")
     run("cd backendfail && docker-compose pull && docker-compose up -d")

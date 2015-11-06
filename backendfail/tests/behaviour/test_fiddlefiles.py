@@ -9,11 +9,14 @@ from fiddles.factories import UserFactory
 from fiddles.models import Fiddle
 
 
+
+@pytest.mark.integration
 @scenario('fiddlefiles.feature', 'Creating files with login')
 def test_creating_files_with_login():
     """Creating files with login."""
 
 
+@pytest.mark.integration
 @pytest.mark.django_db
 @scenario('fiddlefiles.feature', 'Renaming files with login')
 def test_renaming_files_with_login():
@@ -31,36 +34,47 @@ def test_view_anon():
     pass
 
 
+
+@pytest.mark.integration
 @scenario('fiddlefiles.feature', 'Editing files without login')
 def test_edit_anon():
     pass
 
 
+
+@pytest.mark.integration
 @scenario('fiddlefiles.feature', 'Editing files with login')
 def test_edit():
     pass
 
 
+
+@pytest.mark.integration
 @scenario('fiddlefiles.feature', 'Viewing edit mode files with login')
 def test_view_edit():
     pass
 
 
+
+@pytest.mark.integration
 @scenario('fiddlefiles.feature', 'Creating fiddles without login')
 def test_edit_create_anon():
     pass
 
 
+@pytest.mark.integration
 @scenario('fiddlefiles.feature', 'Creating fiddles with login')
 def test_edit_create():
     pass
 
 
+@pytest.mark.integration
 @scenario('fiddlefiles.feature', 'Viewing editing files of others')
 def test_edit_copy_view():
     pass
 
 
+@pytest.mark.integration
 @scenario('fiddlefiles.feature', 'Editing files of others')
 def test_edit_copy():
     pass
