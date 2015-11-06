@@ -13,25 +13,25 @@ from selenium.webdriver.common.keys import Keys
 
 
 
-@pytest.mark.docker
+@pytest.mark.ui
 @scenario('backendfail.feature', 'Viewing the main page')
 def test_view_page():
     pass
 
 
-@pytest.mark.docker
+@pytest.mark.ui
 @scenario('backendfail.feature', 'Redirection to facebook')
 def test_login_facebook():
     pass
 
 
-@pytest.mark.docker
+@pytest.mark.ui
 @scenario('backendfail.feature', 'Redirection to backendfail')
 def test_login_facebook_redirect_back():
     pass
 
 
-@pytest.mark.docker
+@pytest.mark.ui
 # @scenario('backendfail.feature', 'Creating a new fail')
 # def test_create_fail():
 #     pass
@@ -48,16 +48,15 @@ def browser():
 
 @when('I open the main page')
 def view_main(browser):
-    assert "backend.fail" in local("curl http://localhost:9000/", capture=True)
     browser.maximize_window()
-    browser.get("http://localhost:9000/")
+    browser.get("https://localhost/")
     return browser
 
 
 @when('I try to login via facebook')
 def facebook_attempt(browser):
     browser.delete_all_cookies()
-    browser.get("http://localhost:9000/login/facebook/")
+    browser.get("https://localhost/login/facebook/")
 
 
 @when('I succeed at logging in via facebook')

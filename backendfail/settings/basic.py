@@ -34,7 +34,6 @@ SOCIAL_AUTH_FACEBOOK_SECRET = "b4119ae878f7834fad379cc4469139a3"
 SOCIAL_AUTH_FACEBOOK_SCOPE = ['email']
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 # SECURITY WARNING: don't run with debug turned on in production!
-
 ALLOWED_HOSTS = []
 
 AUTHENTICATION_BACKENDS = (
