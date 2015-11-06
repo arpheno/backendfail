@@ -49,9 +49,9 @@ class DynProxyView(FiddleMixin, ProxyView):
         """
         The parent implementation is to proxy the request and return it from the
         upstream server."""
-        self.upstream = self.base_url
         # with container(self.get_object()):
         self.get_object().spawn()
+        self.upstream = self.base_url
         while True:
             try:
                 if path and path[0] == "/":

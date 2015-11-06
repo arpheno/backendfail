@@ -48,7 +48,7 @@ class Fiddle(models.Model):
 
     def spawn(self):
         # Launch the docker container
-        self.write_to_disk()
+        self.write_to_disc()
         self.port = start_container(self)
         self.save()
 
@@ -89,7 +89,7 @@ class Fiddle(models.Model):
     def root(self):
         return os.path.join("/var/containers", self.hash)
 
-    def write_to_disk(self):
+    def write_to_disc(self):
         for file in self.fiddlefile_set.all():
             path = os.path.join(self.root, file.path)
             write_file_to_disk(path, file.content)
