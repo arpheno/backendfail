@@ -74,8 +74,10 @@ def _test(*selectors):
 
 
 def test(*selectors):
+    if selectors == ():
+        selectors = ["unit", "integration", "system", "ui"]
     with conditional('ui' in selectors, selenium):
-        _test(selectors)
+        _test(*selectors)
 
 
 def test_ci_environment():
@@ -94,6 +96,8 @@ def graphite():
 @contextmanager
 def selenium():
     image = "selenium/standalone-chrome"
+    with suppress(Exception):
+        local(r"docker rm -f selenium")
     local(r"docker run --net='host' --name selenium -d " + image)
     yield
     local(r"docker rm -f selenium")
@@ -247,6 +251,13 @@ def clean():
         local("rm -rf ~/backendfail/")
     except:
         pass
+
+
+def tag_version(tag):
+    from pipes import quote
+    content = local("cat backendfail/templates/base.html", capture=True)
+    content = quote(content.replace("VERSION", tag[:8]))
+    local("echo " + content + " > backendfail/templates/base.html")
 
 
 def deploy_staging():
