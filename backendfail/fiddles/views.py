@@ -1,33 +1,22 @@
 import time
-import urllib2
-from contextlib import contextmanager
+
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.core.urlresolvers import reverse_lazy
-from django.http import HttpResponse
-from django.shortcuts import render, redirect
+from django.shortcuts import redirect
 # Create your views here.
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
-from django.views.generic import View, DetailView, UpdateView, ListView, CreateView, \
+from django.views.generic import View, DetailView, UpdateView, CreateView, \
     TemplateView, DeleteView
 from fabric.operations import local
-from httpproxy.views import HttpProxy
-from requests.packages.urllib3._collections import HTTPHeaderDict
 
+from fiddles.helpers import suppress
 from fiddles.models import Fiddle, FiddleFile
 from fiddles import models
 from dj import models as djmodels
 from revproxy.views import ProxyView
 from ror import models as rormodels
-
-
-@contextmanager
-def suppress(*exceptions):
-    try:
-        yield
-    except exceptions:
-        pass
 
 
 class FiddleMixin(object):
@@ -64,12 +53,12 @@ class DynProxyView(FiddleMixin, ProxyView):
         while True:
             try:
                 print path
-                if path and path[0]=="/":
-                    path=path[1:]
+                if path and path[0] == "/":
+                    path = path[1:]
                 result = super(DynProxyView, self).dispatch(request, path)
                 if "location" in result._headers:
                     location = result._headers["location"][1]
-                    location = location[location.find("//")+3:]
+                    location = location[location.find("//") + 3:]
                     path = location[location.find("/"):]
                     base = request.build_absolute_uri()
                     base = base[:base.find("t//") + 2]
@@ -87,7 +76,6 @@ class DynProxyView(FiddleMixin, ProxyView):
         :return: The appropriate Fiddle instance with the correct class
         """
         return Fiddle.objects.select_subclasses().get(pk=self.kwargs['pk'])
-
 
     @property
     def base_url(self):
@@ -185,15 +173,14 @@ class CreateFiddle(LoginRequiredMixin, View):
             return getattr(rormodels, self.kwargs["class"])
 
     def get_success_url(self):
-        return reverse_lazy(
-            "file-edit",
-            kwargs={
-                "pk"  : self.object.id,
-                "path": self.object.entrypoint
-            })
+        kwargs = {
+            "pk"  : self.object.id,
+            "path": self.object.entrypoint
+        }
+        return reverse_lazy("file-edit", kwargs=kwargs)
 
 
-class CreateFile(LoginRequiredMixin, FiddleMixin, CreateView):
+class CreateFile(LoginRequiredMixin, CreateView):
     model = FiddleFile
     fields = ["path"]
 

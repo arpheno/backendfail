@@ -1,34 +1,20 @@
+import hashlib
 import os
+
 from django.conf.global_settings import AUTH_USER_MODEL
 from django.core.exceptions import ValidationError
 from django.core.urlresolvers import reverse_lazy
 from django.db import models
-from fabric.context_managers import lcd
 from fabric.operations import local
 from model_utils.managers import InheritanceManager
 # Create your models here.
-from fiddles.tasks import launch_container
+from fiddles.tasks import start_container, stop_container, remove_container
+from fiddles.helpers import write_file_to_disk
 from settings.basic import BASE_DIR
 
 
 def get_upload_path(instance, filename):
     pass
-
-
-def create_file(path, content):
-    """
-    :param path: Absolute filepath
-    :param content: Content of the file
-    :return:
-    """
-    import os
-    try:
-        dirpath = os.path.join(os.path.join(os.path.split(path)[0]))
-        os.makedirs(dirpath)
-    except OSError as e:
-        pass
-    with open(path, 'w') as file:
-        file.write(content)
 
 
 class Fiddle(models.Model):
@@ -39,30 +25,35 @@ class Fiddle(models.Model):
 
     @property
     def internal_port(self):
-        """ This property specifies the port the webserver is listening on inside the container.
+        """ This property specifies the port the webserver is listening on inside the
+        container.
         For an example see `DjangoFiddle`.  """
-        raise NotImplementedError("This should be implemented by every subclass of Fiddle")
+        raise NotImplementedError(
+            "This should be implemented by every subclass of Fiddle")
 
     @property
     def startup_command(self):
         """ This property specifies a command that should be executed by the container on
         the commandline when it starts up.
         For an example see `DjangoFiddle`.  """
-        raise NotImplementedError("This should be implemented by every subclass of Fiddle")
+        raise NotImplementedError(
+            "This should be implemented by every subclass of Fiddle")
 
     @property
     def docker_image(self):
         """ This property specifies an image from the docker hub that should be run.
         It should expect the user sources under /usr/src/app/
         For an example see `DjangoFiddle`.  """
-        raise NotImplementedError("This should be implemented by every subclass of Fiddle")
+        raise NotImplementedError(
+            "This should be implemented by every subclass of Fiddle")
 
     @property
     def entrypoint(self):
         """ This property defines the path to the file that a user should
         be redirected to when they create a new fiddle.
         For an example see `DjangoFiddle`.  """
-        raise NotImplementedError("This should be implemented by every subclass of Fiddle")
+        raise NotImplementedError(
+            "This should be implemented by every subclass of Fiddle")
 
     @property
     def prefix(self):
@@ -70,62 +61,54 @@ class Fiddle(models.Model):
         is located. `Fiddle` will walk that directory and create `FiddleFiles`
         based on the skeleton, when a new `Fiddle` instance is created.
         For an example see `DjangoFiddle`.  """
-        raise NotImplementedError("This should be implemented by every subclass of Fiddle")
-
-    def _launch(self):
-        """ Launches the docker container asynchronously via celery"""
-        self.port = launch_container(self)
-        self.save()
+        raise NotImplementedError(
+            "This should be implemented by every subclass of Fiddle")
 
     def spawn(self):
-        self._hash()
-        self._write_files()
-        self._launch()
-
-    def _hash(self):
-        import hashlib
-        self.hash = hashlib.md5(''.join(fiddlefile.content for fiddlefile in self.fiddlefile_set.all())).hexdigest()
+        self.hash = hashlib.md5(''.join(
+            fiddlefile.content for fiddlefile in self.fiddlefile_set.all())).hexdigest()
         self.save()
-        return self.hash
+        # Write the content of the files to disk.
+        for fiddlefile in self.fiddlefile_set.all():
+            write_file_to_disk(os.path.join(self.root, fiddlefile.path),
+                               fiddlefile.content)
+        # Launch the docker container
+        self.port = start_container(self)
+        self.save()
 
     def cleanup(self):
-        self._stop()
-        # self._delete_files()
-
-    def _stop(self):
-        local('docker stop -t 0 ' + self.hash)
+        stop_container(self).delay()
 
     def _remove(self):
-        local('docker rm ' + self.hash)
+        remove_container(self).delay()
 
     @property
     def root(self):
         return os.path.join("/var/containers", self.hash)
 
-    def _write_files(self):
-        for fiddlefile in self.fiddlefile_set.all():
-            create_file(os.path.join(self.root, fiddlefile.path), fiddlefile.content)
-
     def get_absolute_url(self):
         return reverse_lazy('fiddle-detail', kwargs={"pk": self.id})
 
     def create_file(self, path, content):
-        obj = FiddleFile.objects.create(
-            content=content, path=path,
-            fiddle=self)
-        obj.save()
+        config = {
+            "content": content,
+            "path"   : path,
+            "fiddle" : self
+        }
+        FiddleFile.objects.create(**config).save()
+    def read_files_from_disc(self, directory):
+        for root, dirs, files in os.walk(directory, topdown=False):
+            for name in files:
+                path = os.path.join(BASE_DIR, root, name)
+                if path.startswith(directory, ):
+                    path = path.replace(directory, '', 1)
+                with open(os.path.join(root, name)) as source:
+                    self.create_file(path, source.read())
 
     def save(self, *args, **kwargs):
         if not self.id:
             result = super(Fiddle, self).save(*args, **kwargs)
-            for root, dirs, files in os.walk(self.prefix, topdown=False):
-                for name in files:
-                    path = os.path.join(BASE_DIR, root, name)
-                    if path.startswith(self.prefix, ):
-                        path = path.replace(self.prefix, '', 1)
-                    print path
-                    with open(os.path.join(root, name)) as source:
-                        self.create_file(path, source.read())
+            self.read_files_from_disc(self.prefix)
         else:
             result = super(Fiddle, self).save(*args, **kwargs)
         return result
