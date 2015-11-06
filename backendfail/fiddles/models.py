@@ -74,9 +74,7 @@ class Fiddle(models.Model):
 
     def _launch(self):
         """ Launches the docker container asynchronously via celery"""
-        self.port = launch_container(
-            self.hash, self.docker_image,
-            self.internal_port, self.startup_command)
+        self.port = launch_container(self)
         self.save()
 
     def spawn(self):

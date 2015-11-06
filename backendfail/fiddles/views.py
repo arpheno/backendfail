@@ -60,6 +60,7 @@ class DynProxyView(FiddleMixin, ProxyView):
         care of either destroying or stopping the container. """
         self.get_object().spawn()
         self.upstream = self.base_url
+
         while True:
             try:
                 print path

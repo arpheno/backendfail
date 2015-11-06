@@ -1,40 +1,69 @@
-import os
-import re
-from random import randint
 from celery import shared_task
-from fabric.context_managers import lcd
-from fabric.operations import local
-from settings.basic import BASE_DIR
+from docker.utils import create_host_config
+from docker import Client
+
+api_base = 'unix://var/run/docker.sock'
+
+
+class DoesNotExist(Exception):
+    pass
+
+
+def get_container_by_name(client, name):
+    """
+    Well it's kind of obvious what this function does.
+
+    :param client: An instance of a docker api client
+    :param name: The name of the container in question
+    :return: If a container by that name exists, return its dict. Otherwise raise
+    """
+    try:
+        return [c for c in client.containers(all=True) if "/" + name in c["Names"]][0]
+    except IndexError:
+        raise DoesNotExist("This container does not exist")
+
+
+def public_port(container):
+    """
+    Gets the public facing port for a given container
+
+    :param container: dict describing a container. Can be obtained from the dockerclient
+    :return: int public port
+    """
+    return container["Ports"][0]["PublicPort"]
+
+
+def build_container_config(fiddle):
+    EXTERNAL_ROOT, INTERNAL_ROOT = '/var/containers/', '/usr/src/app'
+    host_settings = {
+        "port_bindings": {int(fiddle.internal_port): None},
+        "binds"        : [EXTERNAL_ROOT + fiddle.hash + ':' + INTERNAL_ROOT]
+    }
+    host_config = create_host_config(**host_settings)
+    return {
+        "image"      : fiddle.docker_image,
+        "ports"      : [int(fiddle.internal_port)],
+        "volumes"    : [INTERNAL_ROOT],
+        "working_dir": INTERNAL_ROOT,
+        "command"    : fiddle.startup_command,
+        "name"       : fiddle.hash,
+        "host_config": host_config,
+        "detach"     : True
+    }
 
 
 @shared_task
-def launch_container(hash, image, internal_port, startup_command):
+def launch_container(fiddle):
     """
-    :param hash: The hash of the Fiddle to start. It will become the name of the container
-    :param image: The image that we should launch
-    :param internal_port: The port that the internal webserver of the framework listens on
-    :param startup_command: The command that should be executed on startup
-    :return: The exposed port
+    This task takes care of launching the docker container.
     """
-    internal_port = str(internal_port)
-    image = str(image)
-    command = str(startup_command)
-    while True:  # Try to find a fre port
-        exposed_port = randint(8050, 12000)
-        try:
-            ps = local("docker start " + hash + '  && docker ps --all | grep ' + hash,
-                       capture=True)
-            exposed_port = re.search(r".*?:(\d{4,5})", ps).group(1)
-            return exposed_port
-        except SystemExit as e:
-            # We should replace this with docker-py
-            cmd = ["docker run"]
-            cmd.append('--name ' + hash)
-            cmd.append('-v /var/containers/' + hash + ':/usr/src/app')
-            cmd.append('-w /usr/src/app')
-            cmd.append('-p ' + str(exposed_port) + ':' + internal_port + '')
-            cmd.append('-d')
-            cmd.append(image)
-            cmd.append(command)
-            local(' '.join(cmd))
-            return exposed_port
+    api = Client(base_url=api_base)
+    container_config = build_container_config(fiddle)
+    try:
+        started_container = get_container_by_name(api, fiddle.hash)
+        api.start(started_container["Id"])
+        return public_port(get_container_by_name(api, fiddle.hash))
+    except DoesNotExist as e:
+        container = api.create_container(**container_config)
+        api.start(container["Id"])
+        return public_port(get_container_by_name(api, fiddle.hash))
