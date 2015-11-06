@@ -1,5 +1,5 @@
 import time
-
+from contextlib import contextmanager
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.core.urlresolvers import reverse_lazy
@@ -10,7 +10,6 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import View, DetailView, UpdateView, CreateView, \
     TemplateView, DeleteView
 from fabric.operations import local
-
 from fiddles.helpers import suppress
 from fiddles.models import Fiddle, FiddleFile
 from fiddles import models
@@ -33,6 +32,14 @@ class LoginRequiredMixin(object):
         return login_required(view)
 
 
+@contextmanager
+def container(fiddle):
+    """Encapsulate startup and cleanup tasks for the container"""
+    fiddle.spawn()
+    yield
+    fiddle.cleanup()
+
+
 class DynProxyView(FiddleMixin, ProxyView):
     """ This is where the magic happens """
     retries = 10
@@ -41,40 +48,31 @@ class DynProxyView(FiddleMixin, ProxyView):
     def dispatch(self, request, path, *args, **kwargs):
         """
         The parent implementation is to proxy the request and return it from the
-        upstream server.
-        Before we start proxying, we have to run the docker container and start it,
-        perform startup tasks and wait for these to finish. This takes some time so
-        we wait a few seconds.
-        After the request has been processed we call the cleanup method, which takes
-        care of either destroying or stopping the container. """
-        self.get_object().spawn()
+        upstream server."""
         self.upstream = self.base_url
+        with container(self.get_object()):
+            while True:
+                try:
+                    if path and path[0] == "/":
+                        path = path[1:]
+                    result = super(DynProxyView, self).dispatch(request, path)
+                    if "location" in result._headers:
+                        result._headers["location"] = self.rewrite_redirect(result)
+                    return result
+                except:
+                    time.sleep(1)
 
-        while True:
-            try:
-                print path
-                if path and path[0] == "/":
-                    path = path[1:]
-                result = super(DynProxyView, self).dispatch(request, path)
-                if "location" in result._headers:
-                    location = result._headers["location"][1]
-                    location = location[location.find("//") + 3:]
-                    path = location[location.find("/"):]
-                    base = request.build_absolute_uri()
-                    base = base[:base.find("t//") + 2]
-                    print base, path
-                    result._headers["location"] = ('Location', base + path + "/")
-                break
-            except:
-                print self.base_url
-                time.sleep(1)
-        self.get_object().cleanup()
-        return result
+    def rewrite_redirect(self, redirect):
+        """ Oh god, the aweful."""
+        location = redirect._headers["location"][1]
+        location = location[location.find("//") + 3:]
+        path = location[location.find("/"):]
+        base = redirect.build_absolute_uri()
+        base = base[:base.find("t//") + 2]
+        return 'Location', base + path + "/"
 
     def get_object(self):
-        """
-        :return: The appropriate Fiddle instance with the correct class
-        """
+        """ :return: The appropriate Fiddle instance with the correct class """
         return Fiddle.objects.select_subclasses().get(pk=self.kwargs['pk'])
 
     @property
