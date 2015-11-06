@@ -82,3 +82,13 @@ def read_files_from_disc( directory):
                 path = path.replace(directory, '', 1)
             with open(os.path.join(root, name)) as source:
                 yield path, source.read()
+
+
+def copy_fiddle(fiddle):
+    fiddle.id, fiddle.pk = None, None
+    fiddle.save()
+    for file in fiddle.fiddlefile_set.all():
+        file.id, file.pk = None, None
+        file.fiddle = fiddle
+        file.save()
+    return fiddle
