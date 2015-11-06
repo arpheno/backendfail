@@ -88,7 +88,7 @@ def coverage():
             r'coverage run --omit="backendfail/tests/**,backendfail/settings/**,'
             r'**/skeleton/**"'
             r' --source backendfail -m py.test -m "not ui" -v backendfail/tests')
-        local(r'py.test -m "ui" -v backendfail/tests')
+#        local(r'py.test -m "ui" -v backendfail/tests')
 
 
 def graphite():
