@@ -11,8 +11,9 @@ celery
 selenium
 pytest-bdd
 pytest-django
-psycopg2
+coverage
 django-statsd-mozilla
 docker-py
 urllib3
 django-revproxy
+psycopg2cffi

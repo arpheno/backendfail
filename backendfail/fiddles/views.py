@@ -1,33 +1,21 @@
 import time
-import urllib2
 from contextlib import contextmanager
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.core.urlresolvers import reverse_lazy
-from django.http import HttpResponse
-from django.shortcuts import render, redirect
+from django.shortcuts import redirect
 # Create your views here.
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
-from django.views.generic import View, DetailView, UpdateView, ListView, CreateView, \
+from django.views.generic import View, DetailView, UpdateView, CreateView, \
     TemplateView, DeleteView
 from fabric.operations import local
-from httpproxy.views import HttpProxy
-from requests.packages.urllib3._collections import HTTPHeaderDict
-
+from fiddles.helpers import suppress
 from fiddles.models import Fiddle, FiddleFile
 from fiddles import models
 from dj import models as djmodels
 from revproxy.views import ProxyView
 from ror import models as rormodels
-
-
-@contextmanager
-def suppress(*exceptions):
-    try:
-        yield
-    except exceptions:
-        pass
 
 
 class FiddleMixin(object):
@@ -44,6 +32,14 @@ class LoginRequiredMixin(object):
         return login_required(view)
 
 
+@contextmanager
+def container(fiddle):
+    """Encapsulate startup and cleanup tasks for the container"""
+    fiddle.spawn()
+    yield
+    fiddle.cleanup()
+
+
 class DynProxyView(FiddleMixin, ProxyView):
     """ This is where the magic happens """
     retries = 10
@@ -52,42 +48,35 @@ class DynProxyView(FiddleMixin, ProxyView):
     def dispatch(self, request, path, *args, **kwargs):
         """
         The parent implementation is to proxy the request and return it from the
-        upstream server.
-        Before we start proxying, we have to run the docker container and start it,
-        perform startup tasks and wait for these to finish. This takes some time so
-        we wait a few seconds.
-        After the request has been processed we call the cleanup method, which takes
-        care of either destroying or stopping the container. """
+        upstream server."""
+        # with container(self.get_object()):
         self.get_object().spawn()
         self.upstream = self.base_url
-
         while True:
             try:
-                print path
-                if path and path[0]=="/":
-                    path=path[1:]
-                result = super(DynProxyView, self).dispatch(request, path)
-                if "location" in result._headers:
-                    location = result._headers["location"][1]
-                    location = location[location.find("//")+3:]
-                    path = location[location.find("/"):]
-                    base = request.build_absolute_uri()
-                    base = base[:base.find("t//") + 2]
-                    print base, path
-                    result._headers["location"] = ('Location', base + path + "/")
+                if path and path[0] == "/":
+                    path = path[1:]
+                response = super(DynProxyView, self).dispatch(request, path)
+                if "location" in response._headers:
+                    response._headers["location"] = self.rewrite_redirect(response,request)
                 break
             except:
-                print self.base_url
                 time.sleep(1)
         self.get_object().cleanup()
-        return result
+        return response
+
+    def rewrite_redirect(self, response, request):
+        """ Oh god, the aweful."""
+        location = response._headers["location"][1]
+        location = location[location.find("//") + 3:]
+        path = location[location.find("/"):]
+        base = request.build_absolute_uri()
+        base = base[:base.find("t//") + 2]
+        return 'Location', base + path + "/"
 
     def get_object(self):
-        """
-        :return: The appropriate Fiddle instance with the correct class
-        """
+        """ :return: The appropriate Fiddle instance with the correct class """
         return Fiddle.objects.select_subclasses().get(pk=self.kwargs['pk'])
-
 
     @property
     def base_url(self):
@@ -185,15 +174,14 @@ class CreateFiddle(LoginRequiredMixin, View):
             return getattr(rormodels, self.kwargs["class"])
 
     def get_success_url(self):
-        return reverse_lazy(
-            "file-edit",
-            kwargs={
-                "pk"  : self.object.id,
-                "path": self.object.entrypoint
-            })
+        kwargs = {
+            "pk"  : self.object.id,
+            "path": self.object.entrypoint
+        }
+        return reverse_lazy("file-edit", kwargs=kwargs)
 
 
-class CreateFile(LoginRequiredMixin, FiddleMixin, CreateView):
+class CreateFile(LoginRequiredMixin, CreateView):
     model = FiddleFile
     fields = ["path"]
 

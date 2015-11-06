@@ -1,0 +1,7 @@
+FROM pypy:2
+ENV PYTHONUNBUFFERED 1
+RUN apt-get update
+RUN apt-get install -y net-tools
+ADD requirements.txt .
+RUN pip install -r requirements.txt
+RUN pip install gunicorn coverage

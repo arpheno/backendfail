@@ -1,9 +1,4 @@
 import pytest
-import time
-from django.contrib.auth.models import User
-from django.core.urlresolvers import reverse_lazy
-from django.test import Client
-from fabric.operations import local
 from pytest_bdd import scenario, given, when, then
 from pytest_bdd.parsers import re
 from selenium import webdriver
@@ -11,31 +6,28 @@ from selenium.webdriver import DesiredCapabilities
 from selenium.webdriver.common.keys import Keys
 
 
-
-
-@pytest.mark.docker
+@pytest.mark.ui
 @scenario('backendfail.feature', 'Viewing the main page')
 def test_view_page():
     pass
 
 
-@pytest.mark.docker
+@pytest.mark.ui
 @scenario('backendfail.feature', 'Redirection to facebook')
 def test_login_facebook():
     pass
 
 
-@pytest.mark.docker
+@pytest.mark.ui
 @scenario('backendfail.feature', 'Redirection to backendfail')
 def test_login_facebook_redirect_back():
     pass
 
 
-@pytest.mark.docker
+@pytest.mark.ui
 # @scenario('backendfail.feature', 'Creating a new fail')
 # def test_create_fail():
 #     pass
-
 @given('I have a web browser')
 def browser():
     try:
@@ -48,9 +40,8 @@ def browser():
 
 @when('I open the main page')
 def view_main(browser):
-    assert "backend.fail" in local("curl http://localhost:9000/", capture=True)
     browser.maximize_window()
-    browser.get("http://localhost:9000/")
+    browser.get("http://localhost:9000")
     return browser
 
 
@@ -77,6 +68,8 @@ def facebook_succeed(browser):
 @then(re(r'I should be redirected to (?P<destination>.*)'))
 def redirected(browser, destination):
     assert destination in browser.current_url
+
+
 @then('the title should be backend.fail')
 def page_viable(browser):
     assert "backend.fail" in browser.title

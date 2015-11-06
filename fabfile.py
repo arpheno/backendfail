@@ -5,19 +5,25 @@ from fabric.operations import local, sudo, run
 from fabric.api import *
 
 
-def test():
-    with lcd('backendfail'):
-        local('py.test django/test.py')
-
-
 @contextmanager
 def celery():
     ps = local('ps aux', capture=True)
     if not " -A settings worker" in ps:
-        local('cd backendfail && celery -A settings worker --loglevel=INFO &')  # this is probably really bad
+        local(
+            'cd backendfail && celery -A settings worker --loglevel=INFO &')  # this is
+        #  probably really bad
         time.sleep(5)
     yield
     local('killall celery')  # this is probably really bad
+
+
+@contextmanager
+def conditional(condition, manager, *args):
+    if condition:
+        with manager(*args):
+            yield
+    else:
+        yield
 
 
 @contextmanager
@@ -28,72 +34,69 @@ def suppress(*exceptions):
         pass
 
 
+def dev():
+    with celery(), rabbitmq():
+        local(
+            'cd backendfail && python manage.py migrate && python manage.py runserver '
+            '0.0.0.0:8000')  # this is probably really bad
+
+
 @contextmanager
 def runserver():
-    local(
-        'cd backendfail && python manage.py migrate && python manage.py runserver 0.0.0.0:9000 &')  # this is probably really bad
-    time.sleep(10)
+    with lcd("backendfail"):
+        local(r'python manage.py migrate')
+        local(r'python manage.py runserver 0.0.0.0:9000 &')
+        time.sleep(3)
     yield
-    with suppress(SystemError):
-        local('killall python')
+    with lcd("backendfail"), suppress(SystemError):
+        local(r'rm -f db.sqlite3')
+        local(r'killall python')
 
 
-def rdocker():
-    cmd = ["docker run"]
-    cmd.append(" -it")
-    cmd.append("--rm")
-    cmd.append('--user "$(id -u):$(id -g)"')
-    cmd.append('-v "$PWD":/usr/src/app "')
-    cmd.append("-w /usr/src/app rails ")
-    cmd.append("rails new --skip-bundle webapp")
-    local(' '.join(cmd))
-
-
-def ddocker(project='djangoname0'):
-    with lcd("backendfail/media/djangoname0"):
-        cmd = ["docker run"]
-        cmd.append("--name " + project)
-        cmd.append('-v "$PWD":/usr/src/app')
-        cmd.append('-w /usr/src/app')
-        cmd.append('-p 8000:8000')
-        cmd.append('-d django')
-        cmd.append('bash -c "python manage.py runserver 0.0.0.0:8000"')
-        local(' '.join(cmd))
-
-
-def test():
-    return local(r'py.test -n 4 tests')
-
-
-def localcoverage():
-    with  rabbitmq(), selenium():
-        coverage()
+def test_development():
+    local(r'docker-compose -f etc/test_development.yml pull')
+    local(r'docker-compose -f etc/test_development.yml up')
 
 
 def coverage():
-    with celery(), runserver():
-        local(
-            r'coverage run --omit="backendfail/tests/**,backendfail/settings/**,**/skeleton/**"'
-            r' --source backendfail -m py.test -v backendfail/tests')
+    o = ','.join(["backendfail/tests/**", "backendfail/settings/**,**/skeleton/**"])
+    s = "backendfail"
+    return r'coverage run --append --omit="' + o + '" --source ' + s + " -m "
+
+
+def _test(*selectors):
+    local("rm -f .coverage")
+    tags = [' "' + selector + '" ' for selector in selectors]
+    pytest_arguments = '-v backendfail/tests'
+    with conditional('ui' in selectors, runserver):
+        for tag in tags:
+            local(coverage() + r'py.test -m' + tag + pytest_arguments)
+
+
+def test(*selectors):
+    with conditional('ui' in selectors, selenium):
+        _test(selectors)
+
+
+def test_ci_environment():
+    _test("unit", "integration", "system", "ui")
+
+
+# local(r'py.test -m "ui" -v backendfail/tests')
 
 
 def graphite():
-    local(r"docker run --name graphite -p 8005:80 -p 2003:2003 -p 8125:8125/udp -d hopsoft/graphite-statsd")
+    local(
+        r"docker run --name graphite -p 8005:80 -p 2003:2003 -p 8125:8125/udp -d "
+        r"hopsoft/graphite-statsd")
 
 
 @contextmanager
 def selenium():
-    try:
-        local(r"docker start selenium")
-        time.sleep(3)
-        yield
-        local(r"docker stop selenium")
-    except:
-        local(
-            r"docker run --net='host' --name selenium -d -p 4444:4444 selenium/standalone-chrome")
-        time.sleep(3)
-        with selenium():
-            yield
+    image = "selenium/standalone-chrome"
+    local(r"docker run --net='host' --name selenium -d " + image)
+    yield
+    local(r"docker rm -f selenium")
 
 
 @contextmanager
@@ -103,7 +106,8 @@ def rabbitmq():
         yield
         local(r"docker stop rabbitmq")
     except:
-        local("docker run -d --name rabbitmq -p 5672:5672 -p 15672:15672 rabbitmq", capture=True)
+        local("docker run -d --name rabbitmq -p 5672:5672 -p 15672:15672 rabbitmq",
+              capture=True)
         time.sleep(10)
         with rabbitmq():
             yield
@@ -112,7 +116,8 @@ def rabbitmq():
 def postgresql():
     try:
         sudo(
-            r"docker run  --name postgresql -p 5432:5432 -e 'DB_USER=backendfail' -e 'DB_NAME=backendfail' -e 'DB_PASS=backendfail' -d sameersbn/postgresql")
+            r"docker run  --name postgresql -p 5432:5432 -e 'DB_USER=backendfail' -e "
+            r"'DB_NAME=backendfail' -e 'DB_PASS=backendfail' -d sameersbn/postgresql")
     except:
         sudo(r"docker start postgresql")
 
@@ -139,15 +144,18 @@ def init_git(destination='production'):
     with cd("backendfail"):
         run("git init --bare")
     try:
-        local("git remote add " + destination + " backendfail@" + env.hosts[0].split("@")[1] + ":backendfail")
+        local("git remote add " + destination + " backendfail@" + env.hosts[0].split("@")[
+            1] + ":backendfail")
     except:
         pass
     with cd("backendfail/hooks"):
         postreceive = """'#!/bin/bash
 git --work-tree=/var/www/bf/ checkout -f master
 source /var/www/bf/env/bin/activate && cd /var/www/bf/ && pip install -r requirements.txt
-source /var/www/bf/env/bin/activate && cd /var/www/bf/backendfail && python manage.py migrate --settings=settings.production
-source /var/www/bf/env/bin/activate && cd /var/www/bf/backendfail && python manage.py collectstatic --noinput
+source /var/www/bf/env/bin/activate && cd /var/www/bf/backendfail && python manage.py
+migrate --settings=settings.production
+source /var/www/bf/env/bin/activate && cd /var/www/bf/backendfail && python manage.py
+collectstatic --noinput
 source /var/www/bf/env/bin/activate && cd /var/www/bf/backendfail && bower install
 sudo service supervisor restart
 sudo nginx -s reload'"""
@@ -197,8 +205,12 @@ def install_requirements(root='/var/www/bf'):
 
 def symlink_config(root='/var/www/bf'):
     sudo("rm -f /etc/nginx/sites-enabled/default")
-    sudo("ln -sfn " + root + "/conf/supervisor.conf /etc/supervisor/conf.d/backendfail.conf -f")
-    sudo("ln -sfn " + root + "/conf/nginx.conf /etc/nginx/sites-enabled/backendfail.conf -f")
+    sudo(
+        "ln -sfn " + root + "/conf/supervisor.conf "
+                            "/etc/supervisor/conf.d/backendfail.conf -f")
+    sudo(
+        "ln -sfn " + root + "/conf/nginx.conf /etc/nginx/sites-enabled/backendfail.conf "
+                            "-f")
 
 
 def management_commands(root='/var/www/bf'):
@@ -235,3 +247,8 @@ def clean():
         local("rm -rf ~/backendfail/")
     except:
         pass
+
+
+def deploy_staging():
+    run("cd backendfail && docker-compose stop ")
+    run("cd backendfail && docker-compose pull && docker-compose up -d")

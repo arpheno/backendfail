@@ -24,4 +24,5 @@ deployment:
       - docker build -t arpheno/backendfail:development .
       - docker login -e $DOCKER_EMAIL -u $DOCKER_USER -p $DOCKER_PASS
       - docker push arpheno/backendfail
+      - fab deploy_staging -H arphen@nikola.eestec.net
 

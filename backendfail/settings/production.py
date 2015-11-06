@@ -1,20 +1,22 @@
 from basic import *
+from psycopg2cffi import compat
 
+compat.register()
 INSTALLED_APPS
 SECRET_KEY
-ALLOWED_HOSTS = ['backend.fail', 'localhost']
+ALLOWED_HOSTS = ['backend.fail', 'localhost', 'nikola.eestec.net']
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'postgres',
-        'USER': 'postgres',
-        'HOST': 'db',
-        'PORT': '5432',
+        'NAME'  : 'postgres',
+        'USER'  : 'postgres',
+        'HOST'  : 'db',
+        'PORT'  : '5432',
     }
 }
 CACHES = {
     'default': {
-        'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
+        'BACKEND' : 'django.core.cache.backends.memcached.MemcachedCache',
         'LOCATION': 'cache:11211',
     }
 }
