@@ -50,24 +50,27 @@ class DynProxyView(FiddleMixin, ProxyView):
         The parent implementation is to proxy the request and return it from the
         upstream server."""
         self.upstream = self.base_url
-        with container(self.get_object()):
-            while True:
-                try:
-                    if path and path[0] == "/":
-                        path = path[1:]
-                    result = super(DynProxyView, self).dispatch(request, path)
-                    if "location" in result._headers:
-                        result._headers["location"] = self.rewrite_redirect(result)
-                    return result
-                except:
-                    time.sleep(1)
+        # with container(self.get_object()):
+        self.get_object().spawn()
+        while True:
+            try:
+                if path and path[0] == "/":
+                    path = path[1:]
+                response = super(DynProxyView, self).dispatch(request, path)
+                if "location" in response._headers:
+                    response._headers["location"] = self.rewrite_redirect(response,request)
+                break
+            except:
+                time.sleep(1)
+        self.get_object().cleanup()
+        return response
 
-    def rewrite_redirect(self, redirect):
+    def rewrite_redirect(self, response, request):
         """ Oh god, the aweful."""
-        location = redirect._headers["location"][1]
+        location = response._headers["location"][1]
         location = location[location.find("//") + 3:]
         path = location[location.find("/"):]
-        base = redirect.build_absolute_uri()
+        base = request.build_absolute_uri()
         base = base[:base.find("t//") + 2]
         return 'Location', base + path + "/"
 

@@ -27,11 +27,13 @@ def suppress(*exceptions):
     except exceptions:
         pass
 
+def dev():
+    with celery(),rabbitmq():
+        local('cd backendfail && python manage.py migrate && python manage.py runserver 0.0.0.0:8000')  # this is probably really bad
 
 @contextmanager
 def runserver():
-    local(
-        'cd backendfail && python manage.py migrate && python manage.py runserver 0.0.0.0:9000 &')  # this is probably really bad
+    local('cd backendfail && python manage.py migrate && python manage.py runserver 0.0.0.0:9000 &')  # this is probably really bad
     time.sleep(10)
     yield
     with suppress(SystemError):
