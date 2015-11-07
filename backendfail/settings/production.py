@@ -65,7 +65,7 @@ STATSD_PATCHES = [
     'django_statsd.patches.db',
     'django_statsd.patches.cache',
 ]
-STATSD_CLIENT = 'django_statsd.clients.normal'
+STATSD_CLIENT = 'django_statsd.clients.toolbar'
 DEBUG_TOOLBAR_PANELS = [
     'debug_toolbar.panels.versions.VersionsPanel',
     'debug_toolbar.panels.timer.TimerPanel',
