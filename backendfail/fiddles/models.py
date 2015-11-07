@@ -52,7 +52,7 @@ class Fiddle(models.Model):
         self.save()
 
     def cleanup(self):
-        stop_container(self)
+        stop_container.delay(self)
 
     def _remove(self):
         remove_container.delay(self)

@@ -1,5 +1,8 @@
 import os
 from contextlib import contextmanager
+
+from django.views.decorators.cache import cache_page
+
 from settings.basic import BASE_DIR
 
 from django.contrib.auth.decorators import login_required
@@ -98,6 +101,14 @@ class LoginRequiredMixin(object):
     def as_view(cls, **initkwargs):
         view = super(LoginRequiredMixin, cls).as_view(**initkwargs)
         return login_required(view)
+
+class CacheMixin(object):
+    @classmethod
+    def as_view(cls, **initkwargs):
+        view = super(CacheMixin, cls).as_view(**initkwargs)
+        return cache_page(60*15)(view)
+
+
 
 
 def rewrite_redirect(response, request):

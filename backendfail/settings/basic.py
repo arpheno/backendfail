@@ -13,7 +13,6 @@ https://docs.djangoproject.com/en/1.8/ref/settings/
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
 
-from celery import Celery
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -121,12 +120,7 @@ STATICFILES_DIRS = (os.path.join(BASE_DIR, "static"), os.path.join(BASE_DIR, 'co
 LOGIN_URL = "/login/github/"
 LOGIN_REDIRECT_URL = '/'
 
-app = Celery('tasks', backend='rpc://', broker='amqp://')
 
 # Using a string here means the worker will not have to
 # pickle the object when using Windows.
-app.config_from_object('django.conf:settings')
-app.autodiscover_tasks(lambda: INSTALLED_APPS)
-
-
 

@@ -18,3 +18,5 @@ urllib3
 django-revproxy
 psycopg2cffi
 mock
+python-memcached
+django-dont-vary-on
