@@ -1,8 +1,10 @@
 import os
 from contextlib import contextmanager
-from docker.utils import create_host_config
-
 from settings.basic import BASE_DIR
+
+from django.contrib.auth.decorators import login_required
+from docker.utils import create_host_config
+from fabric.operations import local
 
 
 class DoesNotExist(Exception):
@@ -74,7 +76,7 @@ def write_file_to_disk(path, content):
         file.write(content)
 
 
-def read_files_from_disc( directory):
+def read_files_from_disc(directory):
     for root, dirs, files in os.walk(directory, topdown=False):
         for name in files:
             path = os.path.join(BASE_DIR, root, name)
@@ -84,11 +86,25 @@ def read_files_from_disc( directory):
                 yield path, source.read()
 
 
-def copy_fiddle(fiddle):
+def copy_object(original):
+    fiddle = original
     fiddle.id, fiddle.pk = None, None
     fiddle.save()
-    for file in fiddle.fiddlefile_set.all():
-        file.id, file.pk = None, None
-        file.fiddle = fiddle
-        file.save()
     return fiddle
+
+
+class LoginRequiredMixin(object):
+    @classmethod
+    def as_view(cls, **initkwargs):
+        view = super(LoginRequiredMixin, cls).as_view(**initkwargs)
+        return login_required(view)
+
+
+def rewrite_redirect(response, request):
+    """ Oh god, the aweful."""
+    location = response._headers["location"][1]
+    location = location[location.find("//") + 3:]
+    path = location[location.find("/"):]
+    base = request.build_absolute_uri()
+    base = base[:base.find("t//") + 2]
+    return 'Location', base + path + "/"
