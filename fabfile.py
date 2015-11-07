@@ -244,8 +244,10 @@ def tag_version(tag):
 
 
 def deploy(dirname):
-    run("cd " + dirname + " && docker-compose stop ")
-    run("cd " + dirname + " && docker-compose pull && docker-compose up -d")
+    with cd(dirname):
+        run("docker-compose pull ")
+        run(" docker-compose stop ")
+        run("docker-compose up -d")
 
 
 def deploy_staging():
