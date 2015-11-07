@@ -83,7 +83,8 @@ def _test(*tags):
 def test(*selectors):
     if selectors == ():
         selectors = ["unit", "integration", "system", "ui"]
-    with conditional('ui' in selectors, selenium):
+    with conditional('ui' in selectors, selenium), \
+         conditional('system' in selectors, rabbitmq):
         _test(*selectors)
 
 
@@ -235,31 +236,6 @@ def daemons():
     sudo('nginx -s reload')
 
 
-def deploy(destination='production'):
-    with settings(user="backendfail"):
-        init_git(destination)
-        install_deploy_dependencies()
-        postgresql()
-        rabbitmq()
-        create_virtualenv()
-        install_requirements()
-        symlink_config()
-        copy_secret()
-        management_commands()
-        daemons()
-
-
-def clean():
-    try:
-        local("git remote rm production")
-    except:
-        pass
-    try:
-        local("rm -rf ~/backendfail/")
-    except:
-        pass
-
-
 def tag_version(tag):
     from pipes import quote
     content = local("cat backendfail/templates/base.html", capture=True)
@@ -267,6 +243,16 @@ def tag_version(tag):
     local("echo " + content + " > backendfail/templates/base.html")
 
 
+def deploy(dirname):
+    with cd(dirname):
+        run("docker-compose pull ")
+        run(" docker-compose stop ")
+        run("docker-compose up -d")
+
+
 def deploy_staging():
-    run("cd backendfail && docker-compose stop ")
-    run("cd backendfail && docker-compose pull && docker-compose up -d")
+    deploy("backendfail")
+
+
+def deploy_production():
+    deploy("docker")
