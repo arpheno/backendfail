@@ -120,14 +120,13 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'serve', 'static')
 STATICFILES_DIRS = (os.path.join(BASE_DIR, "static"), os.path.join(BASE_DIR, 'components'))
 LOGIN_URL = "/login/github/"
 LOGIN_REDIRECT_URL = '/'
-from django.conf import settings  # noqa
 
 app = Celery('tasks', backend='rpc://', broker='amqp://')
 
 # Using a string here means the worker will not have to
 # pickle the object when using Windows.
 app.config_from_object('django.conf:settings')
-app.autodiscover_tasks(lambda: settings.INSTALLED_APPS)
+app.autodiscover_tasks(lambda: INSTALLED_APPS)
 
 
 @app.task(bind=True)
