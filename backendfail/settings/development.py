@@ -1,3 +1,5 @@
+from celery import Celery
+
 from basic import *
 DEBUG=True
 def show_toolbar(request):
@@ -12,4 +14,14 @@ DATABASES = {
         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
     }
 }
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.dummy.DummyCache',
+    }
+}
+app = Celery('tasks', backend='rpc://', broker='amqp://')
+
+app.config_from_object('django.conf:settings')
+app.autodiscover_tasks(lambda: INSTALLED_APPS)
+
 

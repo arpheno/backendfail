@@ -6,12 +6,14 @@ from django.core.urlresolvers import reverse_lazy
 from django.shortcuts import redirect
 # Create your views here.
 from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_page
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import View, DetailView, UpdateView, CreateView, \
     TemplateView, DeleteView
 from fabric.operations import local
 
-from fiddles.helpers import suppress, copy_object, LoginRequiredMixin, rewrite_redirect
+from fiddles.helpers import suppress, copy_object, LoginRequiredMixin, rewrite_redirect, \
+    CacheMixin
 from fiddles.models import Fiddle, FiddleFile
 from fiddles import models
 from dj import models as djmodels
@@ -52,6 +54,7 @@ class DynProxyView(ProxyView):
                     time.sleep(1)
             self.get_object().cleanup()
         return response
+
     def get_object(self):
         """ :return: The appropriate Fiddle instance with the correct class """
         return Fiddle.objects.select_subclasses().get(pk=self.kwargs['pk'])
@@ -71,7 +74,7 @@ class FiddleView(DetailView):
     template_name = 'fiddles/fiddle_detail.html'
 
 
-class FiddleList(TemplateView):
+class FiddleList(CacheMixin, TemplateView):
     template_name = "fiddles/fiddle_list.html"
 
 
