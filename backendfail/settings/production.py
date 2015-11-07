@@ -81,9 +81,10 @@ DEBUG_TOOLBAR_PANELS = [
     'debug_toolbar.panels.redirects.RedirectsPanel',
     'django_statsd.panel.StatsdPanel',
 ]
-# TOOLBAR_STATSD = {
-#         'graphite': 'http://localhost:8005/render/',
-# }
+TOOLBAR_STATSD = {
+    'graphite': 'http://nikola.eestec.net:8005/render/',
+}
 
 STATSD_MODEL_SIGNALS = True
 STATSD_CELERY_SIGNALS = True
+STATSD_HOST = "nikola.eestec.net"

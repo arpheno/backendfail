@@ -1,3 +1,4 @@
+import pprint
 from contextlib import contextmanager
 import time
 from fabric.context_managers import lcd, cd, prefix
@@ -49,8 +50,8 @@ def runserver():
         time.sleep(3)
     yield
     with lcd("backendfail"), suppress(SystemError):
-        local(r'rm -f db.sqlite3')
         local(r'killall python')
+        local(r'rm -f db.sqlite3')
 
 
 def test_development():
@@ -64,13 +65,19 @@ def coverage():
     return r'coverage run --append --omit="' + o + '" --source ' + s + " -m "
 
 
-def _test(*selectors):
+def _test(*tags):
     local("rm -f .coverage")
-    tags = [' "' + selector + '" ' for selector in selectors]
+    coverages = {}
     pytest_arguments = '-v backendfail/tests'
-    with conditional('ui' in selectors, runserver):
+    with conditional('ui' in tags, runserver):
         for tag in tags:
-            local(coverage() + r'py.test -m' + tag + pytest_arguments)
+            local(coverage() + r'py.test -m "' + tag + '" ' + pytest_arguments)
+            partial_coverage = local("coverage report", capture=True)
+            coverages[tag] = partial_coverage.split("\n")[-1]
+            local("mv .coverage .coverage." + tag)
+    local("coverage combine")
+    for key, value in coverages.items():
+        print '{:10s}{:s}'.format(key, value[10:].strip())
 
 
 def test(*selectors):
@@ -96,11 +103,11 @@ def graphite():
 @contextmanager
 def selenium():
     image = "selenium/standalone-chrome"
-    with suppress(Exception):
+    with settings(warn_only=True):
         local(r"docker rm -f selenium")
-    local(r"docker run --net='host' --name selenium -d " + image)
-    yield
-    local(r"docker rm -f selenium")
+        local(r"docker run --net='host' --name selenium -d " + image)
+        yield
+        local(r"docker rm -f selenium")
 
 
 @contextmanager

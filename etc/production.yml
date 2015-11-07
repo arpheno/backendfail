@@ -37,6 +37,9 @@ server:
    - ~/static:/mnt/static/
    - ~/media:/mnt/media/
 
-#monitor:
-#  image: hopsoft/graphite-statsd
-#  net: container:webapp
+monitor:
+  image: hopsoft/graphite-statsd
+  ports:
+   - "8005:80"
+   - "2003:2003"
+   - "8125:8125/udp"

@@ -17,3 +17,4 @@ docker-py
 urllib3
 django-revproxy
 psycopg2cffi
+mock
