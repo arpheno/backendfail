@@ -7,20 +7,24 @@ DOCKER_SOCKET = 'unix://var/run/docker.sock'
 
 
 @shared_task
-def start_container(fiddle):
+def create_container(internal_port,docker_image,startup_command):
     """ This task takes care of launching docker containers. """
     # Let's get a hold of the docker socket first.
     api = Client(base_url=DOCKER_SOCKET)
-    # Now we do some ugly mangling to get a configuration dict
-    container_config = build_container_config(fiddle)
+    container_config,hash = build_container_config(internal_port,
+                                              docker_image,
+                                              startup_command)
+    container = api.create_container(**container_config)
+    return container['Id'],hash
 
-    try:  # Let's try to start the container first, maybe it has already been created.
-        container = get_container_by_name(api, fiddle.hash)
-    except DoesNotExist:  # ...nope, let's create the container.
-        container = api.create_container(**container_config)
 
-    api.start(container["Id"])
-    return public_port(get_container_by_name(api, fiddle.hash))
+@shared_task
+def start_container(id, internal_port):
+    """ This task takes care of launching docker containers. """
+    # Let's get a hold of the docker socket first.
+    api = Client(base_url=DOCKER_SOCKET)
+    api.start(id)
+    return int(api.port(id, internal_port)[0]['HostPort'])
 
 
 @shared_task
