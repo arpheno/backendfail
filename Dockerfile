@@ -1,4 +1,4 @@
-FROM pypy:2
+FROM python:2.7
 ENV PYTHONUNBUFFERED 1
 RUN apt-get update
 RUN apt-get install -y net-tools
@@ -22,7 +22,7 @@ RUN pip install django-statsd-mozilla
 RUN pip install docker-py
 RUN pip install urllib3
 RUN pip install django-revproxy
-RUN pip install psycopg2cffi
+RUN pip install psycopg2
 RUN pip install python-memcached
 RUN pip install django-dont-vary-on
 RUN mkdir /usr/src/app
@@ -32,5 +32,5 @@ ADD backendfail /usr/src/app/
 RUN rm -f /usr/src/app/settings/secret.py
 ADD etc/gunicorn/config.py /etc/gunicorn/
 WORKDIR /usr/src/app
-CMD pypy manage.py migrate --settings=settings.production && pypy manage.py collectstatic --noinput && gunicorn wsgi --config=/etc/gunicorn/config.py
+CMD python manage.py migrate --settings=settings.production && python manage.py collectstatic --noinput && gunicorn wsgi --config=/etc/gunicorn/config.py
 
