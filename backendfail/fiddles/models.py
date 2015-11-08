@@ -18,7 +18,7 @@ def get_upload_path(instance, filename):
 
 
 class Fiddle(models.Model):
-    id = models.CharField(max_length=42, primary_key=True)
+    id = models.CharField(max_length=64, primary_key=True)
     hash = models.CharField(max_length=32, null=True, blank=True)
     port = models.IntegerField(null=True, blank=True)
     owner = models.ForeignKey(AUTH_USER_MODEL)
