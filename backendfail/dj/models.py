@@ -7,21 +7,25 @@ import os
 class DjangoFiddle(Fiddle):
     @property
     def internal_port(self):
-        """ This property specifies the port the framework is listening on inside the
-        container."""
+        """ This property specifies the port the framework
+        is listening on inside the container."""
         return "8000"
 
     @property
     def startup_command(self):
-        """ This property specifies a command that should be executed by the container on
-        the commandline when it starts up."""
-        return r"bash -c 'python manage.py makemigrations &&" \
-               r" python manage.py migrate && python manage.py runserver 0.0.0.0:8000'"
+        """ This property specifies a command that should be
+        executed by the container on the commandline when it starts up."""
+        commands = []
+        commands.append("python manage.py makemigrations")
+        commands.append("python manage.py migrate")
+        commands.append("python manage.py runserver 0.0.0.0:8000")
+        startup_command = r"bash -c '" + " && ".join(commands) + "'"
+        return startup_command
 
     @property
     def docker_image(self):
-        """ This property specifies an image from the docker hub that should be run.
-        It should expect the user sources under /usr/src/app/"""
+        """ This property specifies an image from the docker hub that
+         should be run. It should expect the user sources under /usr/src/app/"""
         return "django"
 
     @property
