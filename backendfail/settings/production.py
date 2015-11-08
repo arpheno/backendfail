@@ -1,9 +1,7 @@
 from celery import Celery
 
 from basic import *
-from psycopg2cffi import compat
 
-compat.register()
 INSTALLED_APPS
 SECRET_KEY
 ALLOWED_HOSTS = ['backend.fail', 'localhost', 'nikola.eestec.net']
