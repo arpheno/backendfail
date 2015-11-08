@@ -88,7 +88,7 @@ TOOLBAR_STATSD = {
 STATSD_MODEL_SIGNALS = True
 STATSD_CELERY_SIGNALS = True
 STATSD_HOST = "nikola.eestec.net"
-DEBUG=True
+DEBUG=False
 app = Celery('tasks', backend='rpc://messagequeue', broker='amqp://messagequeue')
 app.config_from_object('django.conf:settings')
 app.autodiscover_tasks(lambda: INSTALLED_APPS)
