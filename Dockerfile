@@ -1,4 +1,4 @@
-FROM arpheno/dependencies
+FROM arpheno/dependencies:master
 RUN mkdir /usr/src/app
 RUN mkdir /usr/src/app/containers
 RUN mkdir /etc/gunicorn
