@@ -1,10 +1,10 @@
+import hashlib
 import os
 from contextlib import contextmanager
 
+import datetime
 from django.views.decorators.cache import cache_page
-
 from settings.basic import BASE_DIR
-
 from django.contrib.auth.decorators import login_required
 from docker.utils import create_host_config
 from fabric.operations import local
@@ -38,23 +38,23 @@ def public_port(container):
     return container["Ports"][0]["PublicPort"]
 
 
-def build_container_config(fiddle):
+def build_container_config(internal_port, docker_image, startup_command):
     EXTERNAL_ROOT, INTERNAL_ROOT = '/var/containers/', '/usr/src/app'
+    hash = hashlib.md5(str(datetime.datetime.now())).hexdigest()
     host_settings = {
-        "port_bindings": {int(fiddle.internal_port): None},
-        "binds"        : [EXTERNAL_ROOT + fiddle.hash + ':' + INTERNAL_ROOT]
+        "port_bindings": {int(internal_port): None},
+        "binds"        : [EXTERNAL_ROOT + hash + ':' + INTERNAL_ROOT]
     }
     host_config = create_host_config(**host_settings)
     return {
-        "image"      : fiddle.docker_image,
-        "ports"      : [int(fiddle.internal_port)],
-        "volumes"    : [INTERNAL_ROOT],
-        "working_dir": INTERNAL_ROOT,
-        "command"    : fiddle.startup_command,
-        "name"       : fiddle.hash,
-        "host_config": host_config,
-        "detach"     : True
-    }
+               "image"      : docker_image,
+               "ports"      : [int(internal_port)],
+               "volumes"    : [INTERNAL_ROOT],
+               "working_dir": INTERNAL_ROOT,
+               "command"    : startup_command,
+               "host_config": host_config,
+               "detach"     : True
+           }, hash
 
 
 @contextmanager
@@ -102,13 +102,12 @@ class LoginRequiredMixin(object):
         view = super(LoginRequiredMixin, cls).as_view(**initkwargs)
         return login_required(view)
 
+
 class CacheMixin(object):
     @classmethod
     def as_view(cls, **initkwargs):
         view = super(CacheMixin, cls).as_view(**initkwargs)
-        return cache_page(60*15)(view)
-
-
+        return cache_page(60 * 15)(view)
 
 
 def rewrite_redirect(response, request):

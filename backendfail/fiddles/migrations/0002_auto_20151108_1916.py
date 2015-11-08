@@ -11,8 +11,9 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RemoveField(
-            model_name='fiddlefile',
-            name='file',
+        migrations.AlterField(
+            model_name='fiddle',
+            name='id',
+            field=models.CharField(max_length=64, serialize=False, primary_key=True),
         ),
     ]

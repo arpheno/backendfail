@@ -1,12 +1,15 @@
 import hashlib
 import os
+
+import datetime
 from django.conf.global_settings import AUTH_USER_MODEL
 from django.core.exceptions import ValidationError
 from django.core.urlresolvers import reverse_lazy
 from django.db import models
 from model_utils.managers import InheritanceManager
 # Create your models here.
-from fiddles.tasks import start_container, stop_container, remove_container
+from fiddles.tasks import start_container, stop_container, remove_container, \
+    create_container
 from fiddles.helpers import write_file_to_disk, read_files_from_disc
 
 
@@ -15,6 +18,7 @@ def get_upload_path(instance, filename):
 
 
 class Fiddle(models.Model):
+    id = models.CharField(max_length=64, primary_key=True)
     hash = models.CharField(max_length=32, null=True, blank=True)
     port = models.IntegerField(null=True, blank=True)
     owner = models.ForeignKey(AUTH_USER_MODEL)
@@ -48,12 +52,12 @@ class Fiddle(models.Model):
     def spawn(self):
         # Launch the docker container
         self.write_to_disc()
-        self.port = start_container(self)
+        self.port = start_container(self.id, self.internal_port)
         self.save()
 
     def cleanup(self):
-        #stop_container.delay(self)
-        stop_container.delay(self.hash)
+        # stop_container.delay(self)
+        stop_container.delay(self.id)
 
     def _remove(self):
         remove_container.delay(self)
@@ -73,17 +77,15 @@ class Fiddle(models.Model):
         """`Fiddle` will walk its prefix directory and create `FiddleFiles`
         based from it, when a new `Fiddle` instance is created."""
         if not self.id:  # A new fiddle! Let's create its files.
+            self.id, self.hash = create_container(self.internal_port,
+                                                  self.docker_image,
+                                                  self.startup_command)
             result = super(Fiddle, self).save(*args, **kwargs)
             for path, content in read_files_from_disc(self.prefix):
                 self.create_file(path, content)
         else:  # ... this fiddle already had its files created.
             result = super(Fiddle, self).save(*args, **kwargs)
         return result
-
-    @property
-    def hash(self):
-        return hashlib.md5(
-            ''.join(file.content for file in self.fiddlefile_set.all())).hexdigest()
 
     @property
     def root(self):

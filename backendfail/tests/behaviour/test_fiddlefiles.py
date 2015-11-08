@@ -93,7 +93,10 @@ def myclient(user, client, admin_client, db):
 
 @given("There is a file")
 def fiddlefile(db):
-    return DjangoFiddleFactory().fiddlefile_set.first()
+    obj = UserFactory(username="nikki")
+    fiddle=DjangoFiddleFactory.build(owner=obj)
+    fiddle.save()
+    return fiddle.fiddlefile_set.first()
 
 
 @given("I own the file")
