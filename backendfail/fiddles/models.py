@@ -53,7 +53,7 @@ class Fiddle(models.Model):
 
     def cleanup(self):
         #stop_container.delay(self)
-        stop_container.delay(self)
+        stop_container.delay(self.hash)
 
     def _remove(self):
         remove_container.delay(self)

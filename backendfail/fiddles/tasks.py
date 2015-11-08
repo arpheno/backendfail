@@ -24,10 +24,10 @@ def start_container(fiddle):
 
 
 @shared_task
-def stop_container(fiddle):
+def stop_container(hash):
     """ This task takes care of stopping docker containers. """
     api = Client(base_url=DOCKER_SOCKET)
-    container = get_container_by_name(api, fiddle.hash)
+    container = get_container_by_name(api, hash)
     api.stop(container["Id"])
 
 
