@@ -28,11 +28,10 @@ def start_container(id, internal_port):
 
 
 @shared_task
-def stop_container(hash):
+def stop_container(id):
     """ This task takes care of stopping docker containers. """
     api = Client(base_url=DOCKER_SOCKET)
-    container = get_container_by_name(api, hash)
-    api.stop(container["Id"])
+    api.stop(id)
 
 
 @shared_task
