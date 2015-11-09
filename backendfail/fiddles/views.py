@@ -101,7 +101,7 @@ class CreateFiddle(View):
 
     def get_success_url(self):
         kwargs = {
-            "pk"  : self.object.id[:8],
+            "pk"  : self.object.pk[:8],
             "path": self.object.entrypoint
         }
         return reverse_lazy("file-edit", kwargs=kwargs)
@@ -161,7 +161,7 @@ class FiddleFileMixin(object):
 
     def get_success_url(self):
         kwargs = {
-            "pk"  : self.object.id[:8],
+            "pk"  : self.get_fiddle().id[:8],
             "path": self.object.path
         }
         return reverse_lazy('file-edit', kwargs=kwargs)
