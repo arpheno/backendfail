@@ -77,7 +77,7 @@ class FiddleView(DetailView):
     template_name = 'fiddles/fiddle_detail.html'
 
 
-class FiddleList(CacheMixin, TemplateView):
+class FiddleList(TemplateView):
     template_name = "fiddles/fiddle_list.html"
 
 
