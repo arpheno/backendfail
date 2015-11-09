@@ -60,7 +60,7 @@ class DynProxyView(ProxyView):
 
     def get_object(self):
         """ :return: The appropriate Fiddle instance with the correct class """
-        return Fiddle.objects.select_subclasses().get(pk=self.kwargs['pk'])
+        return Fiddle.objects.select_subclasses().get(pk__startswith=self.kwargs['pk'])
 
     @property
     def base_url(self):
@@ -101,7 +101,7 @@ class CreateFiddle(View):
 
     def get_success_url(self):
         kwargs = {
-            "pk"  : self.object.id,
+            "pk"  : self.object.id[:8],
             "path": self.object.entrypoint
         }
         return reverse_lazy("file-edit", kwargs=kwargs)
@@ -136,7 +136,7 @@ class FiddleFileMixin(object):
         return self.get_fiddle().owner
 
     def get_fiddle(self):
-        return Fiddle.objects.get_subclass(pk=self.kwargs['pk'])
+        return Fiddle.objects.get_subclass(pk__startswith=self.kwargs['pk'])
 
     def copy_on_write(self):
         if not self.owner:
@@ -161,7 +161,7 @@ class FiddleFileMixin(object):
 
     def get_success_url(self):
         kwargs = {
-            "pk"  : self.object.id,
+            "pk"  : self.object.id[:8],
             "path": self.object.path
         }
         return reverse_lazy('file-edit', kwargs=kwargs)
