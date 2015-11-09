@@ -21,6 +21,7 @@ from fiddles.views import FiddleList, CreateFiddle
 import debug_toolbar
 urlpatterns = [
     url(r'^$', FiddleList.as_view(),name="fiddle-list"),
+    url(r'^login/?$', TemplateView.as_view(template_name="login.html"),name="login"),
     url(r'^admin/', include(admin.site.urls)),
     url(r'^__debug__/', include(debug_toolbar.urls)),
     url('', include('social.apps.django_app.urls', namespace='social')),

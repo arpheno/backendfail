@@ -6,6 +6,9 @@
                       style="font-weight:bold;color:white">Save File
         </paper-button>
     </a>
+    {% if not user %}
+    <p>This is an anonymous fiddle, and will be deleted after <span>24 hours</span>. To save and share your work please log in.</p>
+    {% endif %}
 {% endblock %}
 {% block nav %}
     <h1> Project files</h1>
@@ -13,10 +16,10 @@
         {% for file in object.fiddle.fiddlefile_set.all %}
             {% if user == object.fiddle.owner %}
                 <a class="fileitem"
-                   href="{% url 'file-edit' pk=object.fiddle.id path=file.path %}">
+                   href="{% url 'file-edit' pk=object.fiddle.id|slice:':8' path=file.path %}">
             {% else %}
                 <a class="fileitem"
-                   href="{% url 'file-view' pk=object.fiddle.id path=file.path %}">
+                   href="{% url 'file-view' pk=object.fiddle.id|slice:':8' path=file.path %}">
             {% endif %}
         <paper-card
                 {% if file == object %}style="background-color: rgba(11, 128, 67, 0.25)"{% endif %}>
@@ -65,9 +68,9 @@
 {% block content %}
 
     <div id="editor"></div>
-    <wrapped-iframe load="/{{ object.fiddle.id }}/result/" src="/static/loading.html"
+    <wrapped-iframe load="/{{ object.fiddle.id|slice:':8' }}/result/" src="/static/loading.html"
                     id="preview"
-                    baseurl="/{{ object.fiddle.id }}/result/"></wrapped-iframe>
+                    baseurl="/{{ object.fiddle.id|slice:':8' }}/result/"></wrapped-iframe>
     <script src="//d1n0x3qji82z53.cloudfront.net/src-min-noconflict/ace.js"
             type="text/javascript"
             charset="utf-8"></script>
@@ -132,7 +135,7 @@
                         console.log(ev)
                         // Django generating javascript
                         if (ev.target.innerText.length < 100) {
-                            var BASE_URL = '{% url "fiddle-detail" pk=object.fiddle.id %}/'
+                            var BASE_URL = '{% url "fiddle-detail" pk=object.fiddle.id|slice:':8' %}/';
                             var link = BASE_URL + ev.target.innerText + "/rename";
                             console.log(link);
                             document.getElementById("fileeditlink").style.visibility = "visible";
