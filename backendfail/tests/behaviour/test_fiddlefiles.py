@@ -9,6 +9,10 @@ from fiddles.factories import UserFactory
 from fiddles.models import Fiddle
 
 
+@pytest.mark.integration
+@scenario('fiddlefiles.feature', 'Claiming anonymous fiddles')
+def test_claiming_anonymous_fiddle():
+    """Creating files with login."""
 
 @pytest.mark.integration
 @scenario('fiddlefiles.feature', 'Creating files with login')
@@ -99,6 +103,10 @@ def fiddlefile(db):
     return fiddle.fiddlefile_set.first()
 
 
+@given("The file is not owned by anyone")
+def noowner(fiddlefile, user):
+    fiddlefile.fiddle.owner = None
+    fiddlefile.fiddle.save()
 @given("I own the file")
 def obtain(fiddlefile, user):
     fiddlefile.fiddle.owner = User.objects.get(username=user)

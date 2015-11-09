@@ -92,7 +92,8 @@
             z-index: 15;
         }
     </style>
-    <link href='https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900' rel='stylesheet'
+    <link href='https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900'
+          rel='stylesheet'
           type='text/css'>
 
     <script src="{% static 'webcomponentsjs/webcomponents.js' %}"></script>
@@ -130,15 +131,15 @@
             {% block header %}
             {% endblock %}
             <span style="position: absolute;right: 0;top:0;bottom: 0;display: flex;align-items:center;">
-            {% if not user %}
-                <a href="/login/github/">
+            {% if user.is_anonymous %}
+                <a href="/login/?next={{ request.path }}">
                     <paper-button style="color:white !important;">Sign Up</paper-button>
                 </a>
-                <a href="/login/github/">
+                <a href="/login/?next="{{ request.path }}>
                     <paper-button style="color:white !important;">Log In</paper-button>
                 </a>
             {% else %}
-                <a href="/login/github/" style="color:white;text-decoration: none;padding:10px;">
+                <a href="#" style="color:white;text-decoration: none;padding:10px;">
                     {{ user.username }}
                 </a>
             {% endif %}
@@ -155,14 +156,16 @@
 <footer style="display: flex;z-index:1000;align-content:center;align-items:center;justify-content: space-around;background-color: #0b8043;padding:0;position:fixed;bottom: 0;height:20px;left:0;right:0">
     <p style="padding:0;color:white;">
         Please note that this is a beta version.
-        <a style="padding: 2px;text-decoration: none;color:lightblue;" href="https://github.com/arpheno/backendfail/">
+        <a style="padding: 2px;text-decoration: none;color:lightblue;"
+           href="https://github.com/arpheno/backendfail/">
             Contribute on Github VERSION
         </a>
     </p>
 
     <p style="padding:0;color:white;">
         ©2015
-        <a style="padding: 2px;text-decoration: none;color:lightblue;" href="https://careers.stackoverflow.com/sswozny">
+        <a style="padding: 2px;text-decoration: none;color:lightblue;"
+           href="https://careers.stackoverflow.com/sswozny">
             Sebastian Wozny
         </a>
     </p>

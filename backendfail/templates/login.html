@@ -1,0 +1,53 @@
+{% extends 'fiddles/fiddle_list.html' %}
+{% load static %}
+{% block foreground %}
+    <style type="text/css">
+        img {
+            height: 50px;
+        }
+
+        a {
+            flex: 1 1 100%;
+        }
+
+        paper-card ,.sociallogin{
+            flex-wrap: wrap;
+            display: flex;
+            align-content: center;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .sociallogin {
+            justify-content: flex-start;
+        }
+        .sociallogin span {
+            padding-left: 15px;
+        }
+
+        paper-card {
+            padding: 10px;
+            margin: 3px;
+        }
+        paper-card a{
+            text-decoration: none;
+            font-size: larger;
+            text-transform: uppercase;
+        }
+    </style>
+    <div id="wrapper"
+         style="top: 0;bottom: 0;left:0;right:0;position:absolute;flex-wrap: wrap; display: flex;align-content: center;align-items: center;justify-content: center">
+        <paper-card>
+            <a href="/login/stackoverflow/?{{ request.GET.urlencode }}">
+                <div class="sociallogin">
+                    <img src="{% static 'stackoverflow-logo.svg' %}"/><span>Log in with Stackoverflow</span>
+                </div>
+            </a>
+            <a href="/login/github/?{{ request.GET.urlencode }}">
+                <div class="sociallogin">
+                    <img src="{% static 'github-logo.svg' %}"/><span>Log in with Github</span>
+                </div>
+            </a>
+        </paper-card>
+    </div>
+{% endblock %}

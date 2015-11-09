@@ -72,6 +72,7 @@
         <div><img src="{% static 'laravel-logo.svg' %}"></div>
     </div>
     <div id="foreground" style="background-color: rgba(0, 0, 0, 0.5)">
+    {% block foreground %}
         <h2 style="font-size: 7vh;color:#fff;font-weight: 100;">talk is cheap...</h2>
 
         <h1 style="margin-bottom:40px;font-size: 10vh;color:#fff;font-weight: 700;">Show me the Code</h1>
@@ -93,5 +94,6 @@
                 </paper-button>
             </a>
         </div>
+        {% endblock %}
     </div>
 {% endblock %}

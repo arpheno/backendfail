@@ -1,6 +1,5 @@
 import hashlib
 import os
-
 import datetime
 from django.conf.global_settings import AUTH_USER_MODEL
 from django.core.exceptions import ValidationError
@@ -8,20 +7,15 @@ from django.core.urlresolvers import reverse_lazy
 from django.db import models
 from model_utils.managers import InheritanceManager
 # Create your models here.
-from fiddles.tasks import start_container, stop_container, remove_container, \
-    create_container
+from fiddles.tasks import start_container, stop_container, create_container
 from fiddles.helpers import write_file_to_disk, read_files_from_disc
-
-
-def get_upload_path(instance, filename):
-    pass
 
 
 class Fiddle(models.Model):
     id = models.CharField(max_length=64, primary_key=True)
     hash = models.CharField(max_length=32, null=True, blank=True)
     port = models.IntegerField(null=True, blank=True)
-    owner = models.ForeignKey(AUTH_USER_MODEL)
+    owner = models.ForeignKey(AUTH_USER_MODEL, null=True, blank=True)
     objects = InheritanceManager()
 
     @property
@@ -56,14 +50,7 @@ class Fiddle(models.Model):
         self.save()
 
     def cleanup(self):
-        # stop_container.delay(self)
         stop_container.delay(self.id)
-
-    def _remove(self):
-        remove_container.delay(self)
-
-    def get_absolute_url(self):
-        return reverse_lazy('fiddle-detail', kwargs={"pk": self.id})
 
     def create_file(self, path, content):
         config = {
@@ -103,11 +90,10 @@ class FiddleFile(models.Model):
     path = models.CharField(max_length=50)
 
     def clean(self):
-        if self.path[0] in "*/$":
-            raise ValidationError
+        if self.path[0] in "*/":
+            raise ValidationError("No absolute paths allowed.")
         if ".." in self.path:
-            raise ValidationError
+            raise ValidationError("'..' is not a valid path.")
+        if "$" in self.path:
+            raise ValidationError("Environment variables are not allowed.")
         return super(FiddleFile, self).clean()
-
-    def get_absolute_url(self):
-        return self.fiddle.get_absolute_url() + '/' + self.path

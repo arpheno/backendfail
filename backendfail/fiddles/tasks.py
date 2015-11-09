@@ -7,15 +7,15 @@ DOCKER_SOCKET = 'unix://var/run/docker.sock'
 
 
 @shared_task
-def create_container(internal_port,docker_image,startup_command):
+def create_container(internal_port, docker_image, startup_command):
     """ This task takes care of launching docker containers. """
     # Let's get a hold of the docker socket first.
     api = Client(base_url=DOCKER_SOCKET)
-    container_config,hash = build_container_config(internal_port,
-                                              docker_image,
-                                              startup_command)
+    container_config, hash = build_container_config(internal_port,
+                                                    docker_image,
+                                                    startup_command)
     container = api.create_container(**container_config)
-    return container['Id'],hash
+    return container['Id'], hash
 
 
 @shared_task
@@ -32,11 +32,3 @@ def stop_container(id):
     """ This task takes care of stopping docker containers. """
     api = Client(base_url=DOCKER_SOCKET)
     api.stop(id)
-
-
-@shared_task
-def remove_container(fiddle):
-    """ This task takes care of stopping docker containers. """
-    api = Client(base_url=DOCKER_SOCKET)
-    container = get_container_by_name(api, fiddle.hash)
-    api.remove_container(container["Id"])

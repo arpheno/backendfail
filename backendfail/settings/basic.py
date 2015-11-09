@@ -13,7 +13,6 @@ https://docs.djangoproject.com/en/1.8/ref/settings/
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
 
-
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # Quick-start development settings - unsuitable for production
@@ -21,11 +20,16 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # SECURITY WARNING: keep the secret key used in production secret!
 try:
-    from secret import SECRET_KEY, SOCIAL_AUTH_GITHUB_KEY, SOCIAL_AUTH_GITHUB_SECRET
+    from secret import SECRET_KEY, SOCIAL_AUTH_GITHUB_KEY, SOCIAL_AUTH_GITHUB_SECRET, \
+        SOCIAL_AUTH_STACKOVERFLOW_KEY, SOCIAL_AUTH_STACKOVERFLOW_SECRET, \
+        SOCIAL_AUTH_STACKOVERFLOW_API_KEY
 except ImportError:
     SECRET_KEY = "ThisIsATestSecretKey"
     SOCIAL_AUTH_GITHUB_KEY = 'asdasdaasdsdasdasd'
     SOCIAL_AUTH_GITHUB_SECRET = 'asdasdasdasdcab'
+    SOCIAL_AUTH_STACKOVERFLOW_KEY = 'asdasdasd'
+    SOCIAL_AUTH_STACKOVERFLOW_SECRET = 'asdoaskdpaokspd'
+    SOCIAL_AUTH_STACKOVERFLOW_API_KEY = 'asodpasodjpaojwd'
 # For local production testing,
 # facebook oauth will only redirect to https://localhost/complete/facebook/
 SOCIAL_AUTH_FACEBOOK_KEY = "1515264362125489"
@@ -39,6 +43,7 @@ AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend',
     'social.backends.github.GithubOAuth2',
     'social.backends.google.GoogleOAuth2',
+    'social.backends.stackoverflow.StackoverflowOAuth2',
     'social.backends.facebook.FacebookOAuth2',
 )
 # Application definition
@@ -74,10 +79,10 @@ ROOT_URLCONF = 'urls'
 
 TEMPLATES = [
     {
-        'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR, 'templates')],
+        'BACKEND' : 'django.template.backends.django.DjangoTemplates',
+        'DIRS'    : [os.path.join(BASE_DIR, 'templates')],
         'APP_DIRS': True,
-        'OPTIONS': {
+        'OPTIONS' : {
             'context_processors': [
                 'django.template.context_processors.debug',
                 'django.template.context_processors.request',
@@ -116,11 +121,11 @@ STATICFILES_FINDERS = (
 )
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'serve', 'static')
-STATICFILES_DIRS = (os.path.join(BASE_DIR, "static"), os.path.join(BASE_DIR, 'components'))
-LOGIN_URL = "/login/github/"
+STATICFILES_DIRS = (
+    os.path.join(BASE_DIR, "static"), os.path.join(BASE_DIR, 'components'))
+LOGIN_URL = "/login/"
 LOGIN_REDIRECT_URL = '/'
 
 
 # Using a string here means the worker will not have to
 # pickle the object when using Windows.
-

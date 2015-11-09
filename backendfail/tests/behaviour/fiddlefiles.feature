@@ -10,8 +10,9 @@ Feature: FiddleFiles
   Scenario: Editing files without login
     Given I'm logged in as no one
     And There is a file
-    When I try to edit the file
-    Then I should be redirected to the login
+    When I try to access edit the file
+    Then The fiddle should be copied
+    And I should be redirected to the file
 
   Scenario: Viewing edit mode files with login
     Given I'm logged in as peter
@@ -46,7 +47,7 @@ Feature: FiddleFiles
   Scenario: Creating fiddles without login
     Given I'm logged in as no one
     When I try to create a fiddle
-    Then I should be redirected to the login
+    Then A fiddle should be created
 
   Scenario: Creating fiddles with login
     Given I'm logged in as peter
@@ -73,3 +74,11 @@ Feature: FiddleFiles
     And I own the file
     When I try to delete the file
     Then The file should be deleted
+
+  Scenario: Claiming anonymous fiddles
+    Given I'm logged in as peter
+    And There is a file
+    And The file is not owned by anyone
+    When I try to access edit the file
+    Then I should own the copy
+
