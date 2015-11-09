@@ -6,7 +6,7 @@
                       style="font-weight:bold;color:white">Save File
         </paper-button>
     </a>
-    {% if not user %}
+    {% if user.is_anonymous %}
     <p>This is an anonymous fiddle, and will be deleted after <span>24 hours</span>. To save and share your work please log in.</p>
     {% endif %}
 {% endblock %}
