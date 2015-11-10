@@ -44,7 +44,7 @@ COMPRESS_JS_FILTERS = ["compressor.filters.closure.ClosureCompilerFilter"]
 COMPRESS_CLOSURE_COMPILER_BINARY = "/usr/bin/closure-compiler"
 COMPRESS_CLOSURE_COMPILER_ARGUMENTS = "--language_in ECMASCRIPT5"
 COMPRESS_MINT_DELAY = 100
-INSTALLED_APPS = INSTALLED_APPS + (
+MIDDLEWARE_CLASSES(
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'debug_toolbar.middleware.DebugToolbarMiddleware',
@@ -77,6 +77,9 @@ DEBUG_TOOLBAR_PANELS = [
     'debug_toolbar.panels.logging.LoggingPanel',
     'debug_toolbar.panels.redirects.RedirectsPanel',
 ]
+TOOLBAR_STATSD = {
+    'graphite': 'http://nikola.eestec.net:8005/render/',
+}
 
 STATSD_MODEL_SIGNALS = True
 STATSD_CELERY_SIGNALS = True
