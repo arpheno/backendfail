@@ -44,7 +44,7 @@ COMPRESS_JS_FILTERS = ["compressor.filters.closure.ClosureCompilerFilter"]
 COMPRESS_CLOSURE_COMPILER_BINARY = "/usr/bin/closure-compiler"
 COMPRESS_CLOSURE_COMPILER_ARGUMENTS = "--language_in ECMASCRIPT5"
 COMPRESS_MINT_DELAY = 100
-MIDDLEWARE_CLASSES(
+MIDDLEWARE_CLASSES=(
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'debug_toolbar.middleware.DebugToolbarMiddleware',
