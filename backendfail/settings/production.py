@@ -45,9 +45,6 @@ COMPRESS_CLOSURE_COMPILER_BINARY = "/usr/bin/closure-compiler"
 COMPRESS_CLOSURE_COMPILER_ARGUMENTS = "--language_in ECMASCRIPT5"
 COMPRESS_MINT_DELAY = 100
 INSTALLED_APPS = INSTALLED_APPS + (
-    'django_statsd',
-)
-MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'debug_toolbar.middleware.DebugToolbarMiddleware',
@@ -65,7 +62,7 @@ STATSD_PATCHES = [
     'django_statsd.patches.db',
     'django_statsd.patches.cache',
 ]
-STATSD_CLIENT = 'django_statsd.clients.toolbar'
+STATSD_CLIENT = 'django_statsd.clients.normal'
 DEBUG_TOOLBAR_PANELS = [
     'debug_toolbar.panels.versions.VersionsPanel',
     'debug_toolbar.panels.timer.TimerPanel',
@@ -79,11 +76,7 @@ DEBUG_TOOLBAR_PANELS = [
     'debug_toolbar.panels.signals.SignalsPanel',
     'debug_toolbar.panels.logging.LoggingPanel',
     'debug_toolbar.panels.redirects.RedirectsPanel',
-    'django_statsd.panel.StatsdPanel',
 ]
-TOOLBAR_STATSD = {
-    'graphite': 'http://nikola.eestec.net:8005/render/',
-}
 
 STATSD_MODEL_SIGNALS = True
 STATSD_CELERY_SIGNALS = True

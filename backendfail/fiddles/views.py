@@ -18,12 +18,16 @@ from fiddles import models
 from dj import models as djmodels
 from revproxy.views import ProxyView
 from ror import models as rormodels
+from statsd import StatsClient
+
+statsd = StatsClient()
 
 
 @contextmanager
 def container(fiddle):
     """Encapsulate startup and cleanup tasks for the container"""
-    fiddle.spawn()
+    with statsd.timer('container_start'):
+        fiddle.spawn()
     yield
     fiddle.cleanup()
 
@@ -39,7 +43,7 @@ class DynProxyView(ProxyView):
         upstream server."""
         # with container(self.get_object()):
         response = None
-        with container(self.get_object()):
+        with container(self.get_object()),statsd.timer('proxy_wait'):
             self.upstream = self.base_url
             for _ in range(15):
                 try:
