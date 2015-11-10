@@ -57,6 +57,7 @@ INSTALLED_APPS = (
     'fiddles',
     'debug_toolbar',
     'social.apps.django_app.default',
+    'django_statsd',
     'dj',
     'ror',
     'httpproxy'
